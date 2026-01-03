@@ -1,0 +1,67 @@
+{
+  "header": {
+    "perMonth": "в месяц",
+    "totalSpent": "Потрачено за всё время",
+    "subscriptions": "подписок",
+    "subscription_one": "подписка",
+    "subscription_few": "подписки",
+    "subscription_many": "подписок"
+  },
+  "card": {
+    "daysLeft": "через {{count}} дн.",
+    "daysLeft_one": "через {{count}} день",
+    "daysLeft_few": "через {{count}} дня",
+    "daysLeft_many": "через {{count}} дней",
+    "tomorrow": "завтра!",
+    "today": "сегодня!",
+    "alreadyPaid": "уже заплачено",
+    "months": "мес.",
+    "edit": "Изменить",
+    "delete": "Удалить",
+    "startDate": "С",
+    "since": "с",
+    "everyMonth": "каждый {{day}} числа",
+    "ltv": "Всего",
+    "trial": "Триал",
+    "billingToday": "Сегодня!",
+    "billingTomorrow": "Завтра!",
+    "billingIn": "Через {{count}} дн.",
+    "billingIn_one": "Через {{count}} день",
+    "billingIn_few": "Через {{count}} дня",
+    "billingIn_many": "Через {{count}} дней"
+  },
+  "form": {
+    "add": "Добавить подписку",
+    "addShort": "Добавить",
+    "name": "Название",
+    "namePlaceholder": "Netflix, Spotify...",
+    "amount": "Сумма",
+    "amountPlaceholder": "299",
+    "day": "День списания",
+    "dayPlaceholder": "15",
+    "dayHint": "Число месяца (1-31)",
+    "startDate": "Когда была первая оплата?",
+    "today": "Сегодня",
+    "monthAgo": "Месяц назад",
+    "yearAgo": "Год назад",
+    "chooseDate": "Выбрать",
+    "isTrial": "Это пробный период",
+    "save": "Сохранить",
+    "update": "Обновить",
+    "cancel": "Отмена"
+  },
+  "empty": {
+    "title": "Пока нет подписок",
+    "subtitle": "Добавь первую и начни контролировать свои расходы",
+    "cta": "Добавить подписку"
+  },
+  "currency": "P",
+  "confirm": {
+    "delete": "Удалить подписку?",
+    "deleteDesc": "Это действие нельзя отменить",
+    "yes": "Удалить",
+    "no": "Отмена",
+    "deleted": "{{name}} удалена",
+    "undo": "Отменить"
+  }
+}

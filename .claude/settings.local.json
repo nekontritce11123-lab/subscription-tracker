@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(cat:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(powershell -Command \"Start-Process npm -ArgumentList ''run'',''dev'' -NoNewWindow\")",
+      "Bash(curl:*)",
+      "Bash(start \"\" \"F:/Code/Подписки\")",
+      "Bash(cmd /c \"cd /d F:\\\\Code\\\\Подписки && npm run dev\")",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)",
+      "Bash(findstr:*)",
+      "Bash(cmd /c \"taskkill /F /PID 10464\")",
+      "Bash(cmd /c \"taskkill /F /PID 22388 && taskkill /F /PID 5980\")",
+      "Bash(grep:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(dir:*)"
+    ]
+  }
+}

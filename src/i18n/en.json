@@ -1,0 +1,64 @@
+{
+  "header": {
+    "perMonth": "per month",
+    "totalSpent": "Total spent",
+    "subscriptions": "subscriptions",
+    "subscription_one": "subscription",
+    "subscription_other": "subscriptions"
+  },
+  "card": {
+    "daysLeft": "in {{count}} days",
+    "daysLeft_one": "in {{count}} day",
+    "daysLeft_other": "in {{count}} days",
+    "tomorrow": "tomorrow!",
+    "today": "today!",
+    "alreadyPaid": "already paid",
+    "months": "mo.",
+    "edit": "Edit",
+    "delete": "Delete",
+    "startDate": "Since",
+    "since": "since",
+    "everyMonth": "every {{day}}th",
+    "ltv": "Total",
+    "trial": "Trial",
+    "billingToday": "Today!",
+    "billingTomorrow": "Tomorrow!",
+    "billingIn": "In {{count}} days",
+    "billingIn_one": "In {{count}} day",
+    "billingIn_other": "In {{count}} days"
+  },
+  "form": {
+    "add": "Add subscription",
+    "addShort": "Add",
+    "name": "Name",
+    "namePlaceholder": "Netflix, Spotify...",
+    "amount": "Amount",
+    "amountPlaceholder": "299",
+    "day": "Billing day",
+    "dayPlaceholder": "15",
+    "dayHint": "Day of month (1-31)",
+    "startDate": "When was your first payment?",
+    "today": "Today",
+    "monthAgo": "Month ago",
+    "yearAgo": "Year ago",
+    "chooseDate": "Choose",
+    "isTrial": "This is a trial period",
+    "save": "Save",
+    "update": "Update",
+    "cancel": "Cancel"
+  },
+  "empty": {
+    "title": "No subscriptions yet",
+    "subtitle": "Add your first one and start tracking your expenses",
+    "cta": "Add subscription"
+  },
+  "currency": "P",
+  "confirm": {
+    "delete": "Delete subscription?",
+    "deleteDesc": "This action cannot be undone",
+    "yes": "Delete",
+    "no": "Cancel",
+    "deleted": "{{name}} deleted",
+    "undo": "Undo"
+  }
+}

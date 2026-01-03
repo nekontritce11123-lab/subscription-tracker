@@ -1,0 +1,80 @@
+.form {
+  background: var(--tg-theme-secondary-bg-color);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 0 16px 8px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  gap: 12px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.checkboxBox {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--tg-theme-bg-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.checkboxBox.checked {
+  background: var(--tg-theme-button-color);
+}
+
+.checkboxIcon {
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.checkboxLabel {
+  font-size: 15px;
+  color: var(--tg-theme-text-color);
+  user-select: none;
+}
+
+/* Секция выбора даты */
+.dateSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dateLabel {
+  font-size: 13px;
+  color: var(--tg-theme-hint-color);
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.actions button {
+  flex: 1;
+}

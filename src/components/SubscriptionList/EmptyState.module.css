@@ -1,0 +1,110 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  text-align: center;
+  flex: 1;
+  min-height: 400px;
+  animation: fadeIn var(--animation-slow) ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.illustration {
+  margin-bottom: var(--spacing-xl);
+  position: relative;
+}
+
+.emoji {
+  font-size: 72px;
+  display: block;
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-12px) scale(1.05);
+  }
+}
+
+/* Decorative circles behind the emoji */
+.illustration::before,
+.illustration::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.1;
+}
+
+.illustration::before {
+  width: 120px;
+  height: 120px;
+  background: var(--tg-theme-button-color);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.illustration::after {
+  width: 160px;
+  height: 160px;
+  background: var(--tg-theme-button-color);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 3s ease-in-out infinite 0.5s;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.05;
+  }
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--tg-theme-text-color);
+  margin: 0 0 var(--spacing-sm);
+  letter-spacing: -0.3px;
+}
+
+.subtitle {
+  font-size: var(--font-size-md);
+  color: var(--tg-theme-hint-color);
+  margin: 0 0 var(--spacing-2xl);
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+.cta {
+  min-width: 200px;
+}
+
+/* Hint text at bottom */
+.hint {
+  margin-top: var(--spacing-xl);
+  font-size: var(--font-size-sm);
+  color: var(--tg-theme-hint-color);
+  opacity: 0.7;
+}
