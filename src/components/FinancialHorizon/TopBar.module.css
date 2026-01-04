@@ -5,27 +5,28 @@
   align-items: center;
 }
 
-.monthSelector {
+.brand {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  align-items: baseline;
+  gap: var(--spacing-sm);
 }
 
-.month {
-  font-size: var(--font-size-lg);
+.company {
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
-  color: var(--tg-theme-text-color);
+  color: var(--tg-theme-button-color);
 }
 
-.chevron {
-  font-size: var(--font-size-sm);
+.divider {
+  font-size: var(--font-size-md);
   color: var(--tg-theme-hint-color);
-  transform: translateY(-2px);
+  font-weight: var(--font-weight-light);
+}
+
+.productName {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--tg-theme-text-color);
 }
 
 .total {

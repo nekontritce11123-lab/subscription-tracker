@@ -11,10 +11,11 @@ export function TopBar({ data }: TopBarProps) {
 
   return (
     <div className={styles.container}>
-      <button className={styles.monthSelector}>
-        <span className={styles.month}>{data.name} {data.year}</span>
-        <span className={styles.chevron}>&#8964;</span>
-      </button>
+      <div className={styles.brand}>
+        <span className={styles.company}>FactChain</span>
+        <span className={styles.divider}>/</span>
+        <span className={styles.productName}>Tracker</span>
+      </div>
       <span className={styles.total}>
         {data.totalAmount.toLocaleString('ru-RU')} {t('currency')}
       </span>
