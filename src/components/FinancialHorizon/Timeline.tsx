@@ -6,8 +6,8 @@ import styles from './Timeline.module.css';
 interface TimelineProps {
   events: TimelineEvent[];
   today: number;
-  selectedId: string | null;
-  onSubscriptionTap: (id: string | null) => void;
+  selectedDay: number | null;
+  onSubscriptionTap: (ids: string[], day: number) => void;
 }
 
 export interface TimelineRef {
@@ -15,7 +15,7 @@ export interface TimelineRef {
 }
 
 export const Timeline = forwardRef<TimelineRef, TimelineProps>(
-  ({ events, today, selectedId, onSubscriptionTap }, ref) => {
+  ({ events, today, selectedDay, onSubscriptionTap }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const trackRef = useRef<HTMLDivElement>(null);
     const minScrollRef = useRef(0);
@@ -116,21 +116,27 @@ export const Timeline = forwardRef<TimelineRef, TimelineProps>(
         }
       };
 
+      // Mouse wheel horizontal scroll (inverted: wheel up = scroll right to future)
+      const handleWheel = (e: WheelEvent) => {
+        e.preventDefault();
+        container.scrollLeft -= e.deltaY;
+      };
+
       container.addEventListener('touchstart', handleTouchStart, { passive: true });
       container.addEventListener('touchmove', handleTouchMove, { passive: false });
       container.addEventListener('touchend', handleTouchEnd);
+      container.addEventListener('wheel', handleWheel, { passive: false });
 
       return () => {
         container.removeEventListener('touchstart', handleTouchStart);
         container.removeEventListener('touchmove', handleTouchMove);
         container.removeEventListener('touchend', handleTouchEnd);
+        container.removeEventListener('wheel', handleWheel);
       };
     }, []);
 
-    // Check if any subscription in event matches selectedId
-    const isEventSelected = (event: TimelineEvent) => {
-      return event.subscriptions.some(s => s.id === selectedId);
-    };
+    // Determine which day is currently selected (default to today)
+    const activeDay = selectedDay ?? today;
 
     return (
       <div className={styles.timeline} ref={containerRef}>
@@ -139,7 +145,7 @@ export const Timeline = forwardRef<TimelineRef, TimelineProps>(
             <TimelineCard
               key={event.day}
               event={event}
-              isSelected={isEventSelected(event)}
+              isSelected={event.day === activeDay}
               onTap={onSubscriptionTap}
             />
           ))}

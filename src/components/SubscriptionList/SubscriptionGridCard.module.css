@@ -67,6 +67,12 @@
   letter-spacing: 0.3px;
 }
 
+/* Highlighted - selected from timeline */
+.card.highlighted {
+  border-color: var(--app-button-color);
+  box-shadow: 0 0 0 2px rgba(var(--app-button-color-rgb), 0.2);
+}
+
 .card:active {
   transform: scale(0.97);
 }

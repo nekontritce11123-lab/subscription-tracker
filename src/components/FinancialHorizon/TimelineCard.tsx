@@ -5,7 +5,15 @@ import styles from './TimelineCard.module.css';
 interface TimelineCardProps {
   event: TimelineEvent;
   isSelected: boolean;
-  onTap: (subscriptionId: string | null) => void;
+  onTap: (subscriptionIds: string[], day: number) => void;
+}
+
+// Calculate width based on subscription count
+function getContentWidth(count: number): number {
+  if (count <= 1) return 44;
+  if (count === 2) return 64;
+  if (count === 3) return 84;
+  return 100; // 4+ subscriptions
 }
 
 export function TimelineCard({ event, isSelected, onTap }: TimelineCardProps) {
@@ -15,9 +23,7 @@ export function TimelineCard({ event, isSelected, onTap }: TimelineCardProps) {
   const count = subscriptions.length;
 
   const handleClick = () => {
-    if (count > 0) {
-      onTap(subscriptions[0].id);
-    }
+    onTap(subscriptions.map(s => s.id), day);
   };
 
   const cardClasses = [
@@ -25,7 +31,10 @@ export function TimelineCard({ event, isSelected, onTap }: TimelineCardProps) {
     isPast && styles.past,
     isToday && styles.today,
     isSelected && styles.selected,
+    count > 1 && styles.wide,
   ].filter(Boolean).join(' ');
+
+  const contentStyle = count > 1 ? { width: `${getContentWidth(count)}px` } : undefined;
 
   return (
     <div
@@ -33,9 +42,16 @@ export function TimelineCard({ event, isSelected, onTap }: TimelineCardProps) {
       data-day={day}
       onClick={handleClick}
     >
-      <div className={styles.content}>
+      <div className={styles.content} style={contentStyle}>
         {count > 0 && (
-          <span className={styles.count}>{count}</span>
+          <>
+            {subscriptions.slice(0, 4).map((sub, i) => (
+              <span key={sub.id || i} className={styles.emoji}>
+                {sub.icon}
+              </span>
+            ))}
+            {count > 4 && <span className={styles.more}>+{count - 4}</span>}
+          </>
         )}
       </div>
       <span className={styles.dayNumber}>{day}</span>

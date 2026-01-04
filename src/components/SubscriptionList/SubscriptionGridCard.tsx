@@ -7,6 +7,7 @@ import styles from './SubscriptionGridCard.module.css';
 
 interface SubscriptionGridCardProps {
   subscription: Subscription;
+  isHighlighted?: boolean;
   onTap: () => void;
   onLongPress: () => void;
 }
@@ -76,7 +77,7 @@ function calculateTotalSpent(subscription: Subscription): number {
   return payments * amount;
 }
 
-export function SubscriptionGridCard({ subscription, onTap, onLongPress }: SubscriptionGridCardProps) {
+export function SubscriptionGridCard({ subscription, isHighlighted, onTap, onLongPress }: SubscriptionGridCardProps) {
   const { t } = useTranslation();
   const { hapticFeedback } = useTelegram();
   const longPressTimer = useRef<number | null>(null);
@@ -114,6 +115,7 @@ export function SubscriptionGridCard({ subscription, onTap, onLongPress }: Subsc
   const cardClasses = [
     styles.card,
     styles[status],
+    isHighlighted && styles.highlighted,
   ].filter(Boolean).join(' ');
 
   // Используем emoji если есть, иначе icon

@@ -1,6 +1,7 @@
 .card {
   flex-shrink: 0;
-  width: 52px;
+  width: auto;
+  min-width: 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -9,14 +10,21 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Wide card for multiple subscriptions */
+.card.wide {
+  min-width: auto;
+}
+
 .content {
-  width: 44px;
+  min-width: 44px;
   height: 44px;
+  padding: 0 8px;
   border-radius: var(--radius-md);
   background: rgba(var(--app-secondary-bg-color-rgb), 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
   transition: all 0.2s ease;
 }
 
@@ -25,19 +33,28 @@
   opacity: 0.5;
 }
 
-/* Today - blue border */
-.card.today .content {
+/* Selected state - blue border (active day) */
+.card.selected .content {
   border: 2px solid var(--app-button-color);
   background: rgba(var(--app-button-color-rgb), 0.1);
-}
-
-/* Selected state */
-.card.selected .content {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Payment count */
+/* Emoji icon */
+.emoji {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* More indicator (+N) */
+.more {
+  font-size: 12px;
+  font-weight: var(--font-weight-bold);
+  color: var(--app-hint-color);
+}
+
+/* Payment count (legacy, can remove later) */
 .count {
   font-size: 18px;
   font-weight: var(--font-weight-bold);
@@ -56,7 +73,8 @@
   opacity: 0.5;
 }
 
-.card.today .dayNumber {
+/* Selected day number is blue */
+.card.selected .dayNumber {
   color: var(--app-button-color);
   font-weight: var(--font-weight-bold);
 }

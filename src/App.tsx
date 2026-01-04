@@ -34,6 +34,8 @@ function App() {
   const [deletedItem, setDeletedItem] = useState<DeletedItem | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<Subscription | null>(null);
   const [deepLinkId, setDeepLinkId] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [highlightedIds, setHighlightedIds] = useState<string[]>([]);
 
   // Handle deep link from notification (?subscription=<id>)
   useEffect(() => {
@@ -152,6 +154,17 @@ function App() {
     setDeletedItem(null);
   }, []);
 
+  const handleDaySelect = useCallback((ids: string[], day: number) => {
+    hapticFeedback.light();
+    // Toggle: if clicking same day, go back to today (null)
+    // If clicking different day, select it
+    setSelectedDay(prev => prev === day ? null : day);
+    setHighlightedIds(prev => {
+      const same = JSON.stringify(prev) === JSON.stringify(ids);
+      return same ? [] : ids;
+    });
+  }, [hapticFeedback]);
+
   if (!isReady || !isLoaded) {
     return (
       <div className={styles.loading}>
@@ -162,7 +175,11 @@ function App() {
 
   return (
     <div className={styles.app}>
-      <FinancialHorizon subscriptions={subscriptions} />
+      <FinancialHorizon
+        subscriptions={subscriptions}
+        selectedDay={selectedDay}
+        onDaySelect={handleDaySelect}
+      />
 
       <main className={styles.main}>
         {subscriptions.length === 0 ? (
@@ -177,6 +194,7 @@ function App() {
                 <SubscriptionGridCard
                   key={subscription.id}
                   subscription={subscription}
+                  isHighlighted={highlightedIds.includes(subscription.id)}
                   onTap={() => handleCardTap(subscription)}
                   onLongPress={() => handleCardLongPress(subscription)}
                 />
