@@ -1,14 +1,15 @@
 import { Bot } from 'grammy';
 import { config } from '../config.js';
 import { handleStart } from './commands/start.js';
-import { handlePaidCallback, handleOpenCallback } from './callbacks/paid.js';
+import { handlePaidCallback, handlePaidTodayCallback, handleOpenCallback } from './callbacks/paid.js';
 
 export const bot = new Bot(config.botToken);
 
 // Commands
 bot.command('start', handleStart);
 
-// Callbacks
+// Callbacks - paid_today must be before paid to match first
+bot.callbackQuery(/^paid_today:/, handlePaidTodayCallback);
 bot.callbackQuery(/^paid:/, handlePaidCallback);
 bot.callbackQuery(/^open:/, handleOpenCallback);
 

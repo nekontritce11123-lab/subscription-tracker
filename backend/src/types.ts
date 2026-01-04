@@ -18,10 +18,11 @@ export interface Subscription {
   color: string;
   amount: number;
   currency: 'RUB' | 'USD' | 'EUR';
-  period: 'month' | 'year';
+  periodMonths: number; // 1, 2, 3, 6, 12
   billingDay: number; // 1-31
   startDate: string; // ISO date
   isTrial: boolean;
+  emoji?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -47,10 +48,11 @@ export interface CreateSubscriptionData {
   color: string;
   amount: number;
   currency: 'RUB' | 'USD' | 'EUR';
-  period: 'month' | 'year';
+  periodMonths: number;
   billingDay: number;
   startDate: string;
   isTrial: boolean;
+  emoji?: string;
 }
 
 export interface UpdateSubscriptionData {
@@ -59,10 +61,11 @@ export interface UpdateSubscriptionData {
   color?: string;
   amount?: number;
   currency?: 'RUB' | 'USD' | 'EUR';
-  period?: 'month' | 'year';
+  periodMonths?: number;
   billingDay?: number;
   startDate?: string;
   isTrial?: boolean;
+  emoji?: string;
 }
 
 // Notification types

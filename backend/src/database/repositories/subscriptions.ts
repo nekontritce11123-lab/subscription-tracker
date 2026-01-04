@@ -27,10 +27,11 @@ export async function createSubscription(
     color: data.color,
     amount: data.amount,
     currency: data.currency,
-    period: data.period,
+    periodMonths: data.periodMonths,
     billingDay: data.billingDay,
     startDate: data.startDate,
     isTrial: data.isTrial,
+    emoji: data.emoji,
     createdAt: now,
     updatedAt: now,
   };
@@ -127,10 +128,11 @@ export async function syncSubscriptions(
     color: string;
     amount: number;
     currency: 'RUB' | 'USD' | 'EUR';
-    period: 'month' | 'year';
+    periodMonths: number;
     billingDay: number;
     startDate: string;
     isTrial: boolean;
+    emoji?: string;
     createdAt: string;
   }>
 ): Promise<void> {
@@ -149,10 +151,11 @@ export async function syncSubscriptions(
     color: sub.color || '#007AFF',
     amount: sub.amount,
     currency: sub.currency || 'RUB',
-    period: sub.period || 'month',
+    periodMonths: sub.periodMonths || 1,
     billingDay: sub.billingDay,
     startDate: sub.startDate,
     isTrial: sub.isTrial || false,
+    emoji: sub.emoji,
     createdAt: sub.createdAt || now,
     updatedAt: now,
   }));

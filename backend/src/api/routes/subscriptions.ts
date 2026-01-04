@@ -75,10 +75,11 @@ router.post('/', async (req, res: Response) => {
       color: data.color || '#007AFF',
       amount: data.amount,
       currency: data.currency || 'RUB',
-      period: data.period || 'month',
+      periodMonths: data.periodMonths || 1,
       billingDay: data.billingDay,
       startDate: data.startDate,
       isTrial: data.isTrial || false,
+      emoji: data.emoji,
     });
 
     res.status(201).json(subscription);

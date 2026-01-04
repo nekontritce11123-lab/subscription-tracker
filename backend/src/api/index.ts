@@ -35,6 +35,12 @@ app.use(cors({
       return;
     }
 
+    // Allow factchain-traker.ru domain
+    if (origin.includes('factchain-traker.ru')) {
+      callback(null, true);
+      return;
+    }
+
     // Allow configured webapp URL
     if (origin === config.webAppUrl) {
       callback(null, true);

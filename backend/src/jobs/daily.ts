@@ -3,43 +3,68 @@ import { bot } from '../bot/index.js';
 import { config } from '../config.js';
 import { getAllUsers } from '../database/repositories/users.js';
 import { getSubscriptionsByUserId } from '../database/repositories/subscriptions.js';
-import { getOverdueSubscriptions, formatAmount } from '../services/notifications.js';
+import {
+  getOverdueSubscriptions,
+  getDueTomorrowSubscriptions,
+  formatAmount,
+} from '../services/notifications.js';
+import { Subscription, OverdueSubscription } from '../types.js';
 
 /**
- * Send notification for a single overdue subscription
+ * Send reminder for subscription due tomorrow (simple message, no buttons)
  */
-async function sendNotification(
+async function sendReminderMessage(userId: number, sub: Subscription): Promise<void> {
+  const icon = sub.emoji || sub.icon;
+  const message =
+    `📢 Напоминание!\n\n` +
+    `Завтра оплата подписки:\n` +
+    `${icon} ${sub.name}\n` +
+    `💰 ${formatAmount(sub.amount, sub.currency)}`;
+
+  try {
+    await bot.api.sendMessage(userId, message);
+  } catch (error) {
+    console.error(`[Notifications] Failed to send reminder to user ${userId}:`, error);
+  }
+}
+
+/**
+ * Send notification for overdue or due-today subscription (with buttons)
+ */
+async function sendOverdueMessage(
   userId: number,
-  subscription: { subscription: any; overdueDays: number; isDueToday: boolean }
+  item: OverdueSubscription
 ): Promise<void> {
-  const { subscription: sub, overdueDays, isDueToday } = subscription;
+  const { subscription: sub, overdueDays, isDueToday } = item;
+  const icon = sub.emoji || sub.icon;
 
   let message: string;
-  let emoji: string;
 
   if (isDueToday) {
-    emoji = '🔔';
-    message = `${emoji} Сегодня оплата!\n\n`;
-    message += `📦 ${sub.name}\n`;
-    message += `💰 ${formatAmount(sub.amount, sub.currency)}\n\n`;
-    message += `Не забудь оплатить подписку!`;
+    message =
+      `🔔 Сегодня оплата!\n\n` +
+      `${icon} ${sub.name}\n` +
+      `💰 ${formatAmount(sub.amount, sub.currency)}`;
   } else {
-    emoji = '⚠️';
-    const daysText = overdueDays === 1 ? 'день' : overdueDays < 5 ? 'дня' : 'дней';
-    message = `${emoji} Просрочен платеж!\n\n`;
-    message += `📦 ${sub.name}\n`;
-    message += `💰 ${formatAmount(sub.amount, sub.currency)}\n`;
-    message += `📅 Просрочено на ${overdueDays} ${daysText}\n\n`;
-    message += `Оплати как можно скорее!`;
+    const daysText =
+      overdueDays === 1 ? 'день' : overdueDays < 5 ? 'дня' : 'дней';
+    message =
+      `⚠️ Просрочен платеж!\n\n` +
+      `${icon} ${sub.name}\n` +
+      `💰 ${formatAmount(sub.amount, sub.currency)}\n` +
+      `📅 Просрочено на ${overdueDays} ${daysText}`;
   }
 
   try {
     await bot.api.sendMessage(userId, message, {
       reply_markup: {
         inline_keyboard: [
+          [{ text: '✅ Оплатил сегодня', callback_data: `paid_today:${sub.id}` }],
           [
-            { text: '✅ Оплатил', callback_data: `paid:${sub.id}` },
-            { text: '📱 Открыть', web_app: { url: `${config.webAppUrl}?subscription=${sub.id}` } },
+            {
+              text: '📱 Укажу когда оплатил',
+              web_app: { url: `${config.webAppUrl}?subscription=${sub.id}` },
+            },
           ],
         ],
       },
@@ -57,38 +82,48 @@ async function sendDailyNotifications(): Promise<void> {
 
   try {
     const users = await getAllUsers();
-    let totalNotifications = 0;
+    let reminders = 0;
+    let overdueNotifications = 0;
 
     for (const user of users) {
       const subscriptions = await getSubscriptionsByUserId(user.id);
+
+      // 1. Due tomorrow — simple reminder message (no buttons)
+      const dueTomorrow = getDueTomorrowSubscriptions(subscriptions);
+      for (const sub of dueTomorrow) {
+        await sendReminderMessage(user.id, sub);
+        reminders++;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
+      // 2. Due today or overdue — message with buttons
       const overdueItems = getOverdueSubscriptions(subscriptions);
-
       for (const item of overdueItems) {
-        await sendNotification(user.id, item);
-        totalNotifications++;
-
-        // Small delay between messages to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await sendOverdueMessage(user.id, item);
+        overdueNotifications++;
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     }
 
-    console.log(`[Notifications] Sent ${totalNotifications} notifications to ${users.length} users`);
+    console.log(
+      `[Notifications] Sent ${reminders} reminders, ${overdueNotifications} overdue notifications to ${users.length} users`
+    );
   } catch (error) {
     console.error('[Notifications] Error:', error);
   }
 }
 
 /**
- * Start daily cron job at 12:00 Moscow time (MSK = UTC+3)
+ * Start daily cron job at 10:00 Moscow time (MSK = UTC+3)
  */
 export function startDailyJob(): void {
-  // Schedule for 12:00 Moscow time
-  cron.schedule('0 12 * * *', sendDailyNotifications, {
+  // Schedule for 10:00 Moscow time
+  cron.schedule('0 10 * * *', sendDailyNotifications, {
     scheduled: true,
     timezone: 'Europe/Moscow',
   });
 
-  console.log('[Jobs] Daily notification job scheduled for 12:00 MSK');
+  console.log('[Jobs] Daily notification job scheduled for 10:00 MSK');
 }
 
 // Export for manual triggering (testing)
