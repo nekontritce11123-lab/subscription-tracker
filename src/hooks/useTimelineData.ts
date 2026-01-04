@@ -30,7 +30,7 @@ export function useTimelineData(subscriptions: Subscription[]): MonthData {
       const daysUntil = getDaysUntil(sub.billingDay, sub.startDate);
 
       // isPast: billing day passed OR it's today but subscription started today (already paid)
-      const isPast = billingDay < today || (billingDay === today && daysUntil > 0);
+      const isPast = billingDay < today && daysUntil > 0;
 
       // Calculate monthly equivalent (divide by period for yearly/quarterly subs)
       const periodMonths = sub.periodMonths || 1;
