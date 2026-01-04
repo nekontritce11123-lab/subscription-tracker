@@ -17,7 +17,7 @@ export function TopBar({ data }: TopBarProps) {
         <span className={styles.productName}>Tracker</span>
       </div>
       <span className={styles.total}>
-        {data.totalAmount.toLocaleString('ru-RU')} {t('currency')}
+        {Math.round(data.totalAmount).toLocaleString('ru-RU')} {t('currency')}
       </span>
     </div>
   );

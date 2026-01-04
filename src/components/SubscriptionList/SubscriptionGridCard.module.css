@@ -3,8 +3,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-md);
+  gap: 6px;
+  padding: 10px;
   background: var(--app-secondary-bg-color);
   border-radius: var(--radius-lg);
   cursor: pointer;
@@ -12,6 +12,8 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   user-select: none;
   border: 2px solid transparent;
+  min-height: 120px;
+  justify-content: space-between;
 }
 
 /* Urgent - red border */
@@ -25,13 +27,13 @@
 }
 
 .card.overdue .iconWrapper {
-  box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.15);
+  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.2);
   animation: overduePulse 2s ease-in-out infinite;
 }
 
 @keyframes overduePulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.15); }
-  50% { box-shadow: 0 0 0 8px rgba(255, 59, 48, 0.08); }
+  0%, 100% { box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.2); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 59, 48, 0.1); }
 }
 
 /* Due today - red border without animation */
@@ -40,7 +42,7 @@
 }
 
 .card.dueToday .iconWrapper {
-  box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.15);
+  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.2);
 }
 
 /* Trial - special background + FREE badge */
@@ -55,57 +57,66 @@
 .freeBadge {
   position: absolute;
   top: 6px;
-  left: 6px;
-  font-size: 9px;
+  right: 6px;
+  font-size: 8px;
   font-weight: var(--font-weight-bold);
   color: #fff;
   background: #34C759;
-  padding: 2px 6px;
+  padding: 2px 5px;
   border-radius: 4px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .card:active {
   transform: scale(0.97);
 }
 
+/* Header: icon + name */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
 /* Icon wrapper */
 .iconWrapper {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-md);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .icon {
-  font-size: 26px;
+  font-size: 16px;
 }
 
 /* Name */
 .name {
-  font-size: var(--font-size-sm);
+  font-size: 11px;
   font-weight: var(--font-weight-medium);
   color: var(--app-text-color);
-  text-align: center;
   line-height: 1.2;
-  max-width: 100%;
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Status */
-.status {
-  font-size: var(--font-size-xs);
-  color: var(--app-hint-color);
-  text-align: center;
+/* Price block */
+.priceBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 
 /* Price */
 .price {
-  font-size: var(--font-size-md);
+  font-size: 18px;
   font-weight: var(--font-weight-bold);
   color: var(--app-text-color);
 }
@@ -114,7 +125,12 @@
 .totalSpent {
   font-size: 10px;
   color: var(--app-hint-color);
+  opacity: 0.7;
+}
+
+/* Status */
+.status {
+  font-size: 10px;
+  color: var(--app-hint-color);
   text-align: center;
-  margin-top: 2px;
-  opacity: 0.8;
 }

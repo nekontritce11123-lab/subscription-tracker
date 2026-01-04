@@ -121,19 +121,29 @@ export function SubscriptionGridCard({ subscription, onTap, onLongPress }: Subsc
       onTouchCancel={handleTouchEnd}
     >
       {status === 'trial' && <span className={styles.freeBadge}>FREE</span>}
-      <div className={styles.iconWrapper} style={{ backgroundColor: subscription.color }}>
-        <span className={styles.icon}>{displayIcon}</span>
+
+      {/* Верх: иконка + название */}
+      <div className={styles.header}>
+        <div className={styles.iconWrapper} style={{ backgroundColor: subscription.color }}>
+          <span className={styles.icon}>{displayIcon}</span>
+        </div>
+        <span className={styles.name}>{subscription.name}</span>
       </div>
-      <span className={styles.name}>{subscription.name}</span>
-      <span className={styles.status}>{statusText}</span>
-      <span className={styles.price}>
-        {subscription.amount.toLocaleString('ru-RU')} {t('currency')}
-      </span>
-      {totalSpent > 0 && (
-        <span className={styles.totalSpent}>
-          Потрачено: {totalSpent.toLocaleString('ru-RU')} {t('currency')}
+
+      {/* Центр: цена + потрачено */}
+      <div className={styles.priceBlock}>
+        <span className={styles.price}>
+          {subscription.amount.toLocaleString('ru-RU')} {t('currency')}
         </span>
-      )}
+        {totalSpent > 0 && (
+          <span className={styles.totalSpent}>
+            ~{totalSpent.toLocaleString('ru-RU')} {t('currency')}
+          </span>
+        )}
+      </div>
+
+      {/* Низ: статус */}
+      <span className={styles.status}>{statusText}</span>
     </div>
   );
 }
