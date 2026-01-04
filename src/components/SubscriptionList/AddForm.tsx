@@ -24,6 +24,9 @@ const PERIOD_OPTIONS = [
   { value: 12, label: '1 год' },
 ];
 
+const DEFAULT_CURRENCY = 'RUB';
+
+
 // Эмодзи для подписок
 const POPULAR_EMOJI = [
   // Медиа и стриминг
@@ -109,7 +112,7 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
       icon: emoji || autoIcon,
       color: autoColor,
       amount: amountNum,
-      currency: 'RUB',
+      currency: DEFAULT_CURRENCY,
       periodMonths,
       billingDay: dayNum,
       startDate: new Date(startDate).toISOString(),
@@ -121,8 +124,22 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
   const handleDayChange = (value: string) => {
     const val = value.replace(/\D/g, '');
     const num = parseInt(val, 10);
-    if (!val || (num >= 1 && num <= 31)) {
+    const currentDate = new Date(startDate);
+    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+
+    // Calculate max allowed day (can't be in the future)
+    const today = new Date();
+    const isCurrentMonth = currentDate.getFullYear() === today.getFullYear() &&
+                           currentDate.getMonth() === today.getMonth();
+    const maxDay = isCurrentMonth ? Math.min(daysInMonth, today.getDate()) : daysInMonth;
+
+    if (!val || (num >= 1 && num <= maxDay)) {
       setBillingDay(val);
+      // Sync with calendar date
+      if (num >= 1 && num <= maxDay) {
+        currentDate.setDate(num);
+        setStartDate(currentDate.toISOString().split('T')[0]);
+      }
     }
   };
 
@@ -204,14 +221,16 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
 
         {/* Сумма, Период, День */}
         <div className={styles.rowThree}>
-          <Input
-            label={t('form.amount')}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
-            placeholder="0"
-            inputMode="numeric"
-            suffix={t('currency')}
-          />
+          <div className={styles.amountWrapper}>
+            <Input
+              label={t('form.amount')}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
+              placeholder="0"
+              inputMode="numeric"
+            />
+            <span className={styles.currencySymbol}>₽</span>
+          </div>
           <div className={styles.periodWrapper}>
             <span className={styles.periodLabel}>Период</span>
             <div
@@ -224,13 +243,22 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
               {PERIOD_OPTIONS.find(o => o.value === periodMonths)?.label}
             </div>
           </div>
-          <Input
-            label="День списания"
-            value={billingDay}
-            onChange={(e) => handleDayChange(e.target.value)}
-            placeholder="1-31"
-            inputMode="numeric"
-          />
+          <div className={styles.dayWrapper}>
+            <span className={styles.dayLabel}>{t('form.day')}</span>
+            <div className={styles.dayInputRow}>
+              <input
+                type="text"
+                className={styles.dayInput}
+                value={billingDay}
+                onChange={(e) => handleDayChange(e.target.value)}
+                placeholder="1"
+                inputMode="numeric"
+              />
+              <span className={styles.monthBadge}>
+                {(t('months.short', { returnObjects: true }) as string[])[new Date(startDate).getMonth()]}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Period picker popup */}

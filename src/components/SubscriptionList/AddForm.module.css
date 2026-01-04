@@ -51,9 +51,70 @@
 /* Три колонки: сумма, период, день */
 .rowThree {
   display: grid;
-  grid-template-columns: 1fr 60px 95px;
+  grid-template-columns: 175px 60px 1fr;
   gap: 6px;
   align-items: stretch;
+}
+
+/* Amount wrapper with currency button */
+.amountWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.currencySymbol {
+  position: absolute;
+  right: 10px;
+  bottom: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--app-hint-color);
+}
+
+/* Day wrapper with month badge */
+.dayWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dayLabel {
+  font-size: 13px;
+  color: var(--app-hint-color);
+  font-weight: 500;
+}
+
+.dayInputRow {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  height: 44px;
+  padding: 0 8px;
+  padding-top: 12px;
+  border-radius: 10px;
+  background: var(--app-bg-color);
+}
+
+.dayInput {
+  width: 24px;
+  background: none;
+  border: none;
+  color: var(--app-text-color);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  outline: none;
+}
+
+.dayInput::placeholder {
+  color: var(--app-hint-color);
+}
+
+.monthBadge {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--app-text-color);
 }
 
 /* Период выбора */

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MonthData, Subscription } from '../../types/subscription';
 import { useTelegram } from '../../hooks/useTelegram';
@@ -65,19 +65,48 @@ export function TopBar({ data, subscriptions }: TopBarProps) {
   const monthlyTotal = Math.round(data.totalAmount);
   const stats = useMemo(() => calculateStats(subscriptions, monthlyTotal), [subscriptions, monthlyTotal]);
 
-  const handleTotalClick = () => {
-    hapticFeedback.light();
-    if (isVisible) {
-      // Закрытие с анимацией
+  const closePopup = useCallback(() => {
+    if (isVisible && !isClosing) {
       setIsClosing(true);
       setTimeout(() => {
         setIsVisible(false);
         setIsClosing(false);
       }, 150);
+    }
+  }, [isVisible, isClosing]);
+
+  const handleTotalClick = () => {
+    hapticFeedback.light();
+    if (isVisible) {
+      closePopup();
     } else {
       setIsVisible(true);
     }
   };
+
+  // Close popup when clicking anywhere
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Don't close if clicking on the popup itself or the button
+      if (target.closest(`.${styles.statsPopup}`) || target.closest(`.${styles.totalButton}`)) {
+        return;
+      }
+      closePopup();
+    };
+
+    // Small delay to prevent immediate close on open
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside);
+    }, 10);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isVisible, closePopup]);
 
   return (
     <div className={styles.container}>
@@ -94,7 +123,6 @@ export function TopBar({ data, subscriptions }: TopBarProps) {
       {isVisible && (
         <div
           className={`${styles.statsPopup} ${isClosing ? styles.closing : ''}`}
-          onClick={handleTotalClick}
         >
           <div className={styles.statsArrow} />
 

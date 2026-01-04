@@ -55,7 +55,10 @@
     "subtitle": "Add your first one and start tracking your expenses",
     "cta": "Add subscription"
   },
-  "currency": "P",
+  "currency": "₽",
+  "months": {
+    "short": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  },
   "timeline": {
     "today": "Today",
     "total": "Total",
