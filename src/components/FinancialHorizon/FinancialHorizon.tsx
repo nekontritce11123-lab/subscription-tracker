@@ -28,7 +28,7 @@ export function FinancialHorizon({ subscriptions }: FinancialHorizonProps) {
 
   return (
     <header className={styles.header}>
-      <TopBar data={monthData} />
+      <TopBar data={monthData} subscriptions={subscriptions} />
 
       <Timeline
         ref={timelineRef}

@@ -24,12 +24,24 @@ const PERIOD_OPTIONS = [
   { value: 12, label: '1 год' },
 ];
 
+// Эмодзи для подписок
 const POPULAR_EMOJI = [
-  '🎬', '🎵', '🎮', '☁️', '📱', '💪', '📚', '🍿',
-  '🎧', '📺', '🛒', '🚗', '🏠', '💼', '🎨', '🔒',
-  '💰', '🎯', '🚀', '⭐', '🔥', '💎', '🎁', '🌈',
-  '🍕', '☕', '🍺', '🎲', '🎪', '🎭', '🎤', '📸',
-  '✈️', '🏋️', '🧘', '🎾', '⚽', '🏀', '🎱', '🎳',
+  // Медиа и стриминг
+  '🎬', '📺', '🎵', '🎧', '🍿', '📽️', '🎞️', '📻', '🎤', '🎹',
+  // Игры
+  '🎮', '🕹️', '👾', '🎯', '🏆', '⚔️', '🎰', '🃏', '♟️', '🎲',
+  // Работа и продуктивность
+  '💼', '📊', '📈', '💻', '🖥️', '📝', '✏️', '📁', '📧', '💡',
+  // Облака и хранение
+  '☁️', '📦', '💾', '🔐', '🔒', '🛡️', '📤', '📥', '🗄️', '💿',
+  // Спорт и здоровье
+  '💪', '🏋️', '🧘', '🚴', '🏃', '⚽', '🎾', '🏀', '🏊', '🥊',
+  // Еда и напитки
+  '🍕', '☕', '🍔', '🥗', '🍺', '🍷', '🧁', '🍣', '🍜', '🥤',
+  // Путешествия
+  '✈️', '🚗', '🏨', '🗺️', '🌍', '🚀', '🛳️', '🎒', '⛺', '🏖️',
+  // Разное
+  '⭐', '🔥', '💎', '🎁', '🌈', '🎨', '📸', '🐱', '🐶', '🌸',
 ];
 
 function getColorFromName(name: string): string {
@@ -60,7 +72,6 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
   const [startDate, setStartDate] = useState(getTodayString());
   const [emoji, setEmoji] = useState(editingSubscription?.emoji || '');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [isEmojiClosing, setIsEmojiClosing] = useState(false);
   const [showPeriodPicker, setShowPeriodPicker] = useState(false);
 
   const autoIcon = useMemo(() => editingSubscription?.icon || getIconFromName(name), [name, editingSubscription?.icon]);
@@ -128,14 +139,6 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
     setBillingDay(date.getDate().toString());
   };
 
-  // Закрытие emoji picker с анимацией
-  const closeEmojiPicker = () => {
-    setIsEmojiClosing(true);
-    setTimeout(() => {
-      setShowEmojiPicker(false);
-      setIsEmojiClosing(false);
-    }, 150);
-  };
 
   const isValid = useMemo(() => {
     const amountNum = parseInt(amount, 10);
@@ -149,9 +152,12 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
         {/* Название с иконкой слева */}
         <div className={styles.nameRow}>
           <div
-            className={styles.iconButton}
+            className={`${styles.iconButton} ${showEmojiPicker ? styles.iconButtonActive : ''}`}
             style={{ backgroundColor: autoColor }}
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            onClick={() => {
+              hapticFeedback.light();
+              setShowEmojiPicker(!showEmojiPicker);
+            }}
           >
             {emoji || autoIcon}
           </div>
@@ -165,44 +171,36 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
           />
         </div>
 
-        {/* Emoji picker - overlay поверх других элементов */}
-        {showEmojiPicker && (
-          <>
-            <div
-              className={`${styles.emojiBackdrop} ${isEmojiClosing ? styles.closing : ''}`}
-              onClick={closeEmojiPicker}
-            />
-            <div className={`${styles.emojiPickerOverlay} ${isEmojiClosing ? styles.closing : ''}`}>
-              <div className={styles.emojiPicker}>
-                <button
-                  type="button"
-                  className={`${styles.emojiItem} ${!emoji ? styles.emojiItemActive : ''}`}
-                  onClick={() => {
-                    hapticFeedback.light();
-                    setEmoji('');
-                    closeEmojiPicker();
-                  }}
-                >
-                  {autoIcon}
-                </button>
-                {POPULAR_EMOJI.map((e) => (
-                  <button
-                    key={e}
-                    type="button"
-                    className={`${styles.emojiItem} ${emoji === e ? styles.emojiItemActive : ''}`}
-                    onClick={() => {
-                      hapticFeedback.light();
-                      setEmoji(e);
-                      closeEmojiPicker();
-                    }}
-                  >
-                    {e}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
+        {/* Emoji picker — inline expansion */}
+        <div className={`${styles.emojiSection} ${showEmojiPicker ? styles.emojiSectionOpen : ''}`}>
+          <div className={styles.emojiGrid}>
+            <button
+              type="button"
+              className={`${styles.emojiItem} ${styles.emojiReset} ${!emoji ? styles.emojiItemActive : ''}`}
+              onClick={() => {
+                hapticFeedback.light();
+                setEmoji('');
+                setShowEmojiPicker(false);
+              }}
+            >
+              {autoIcon}
+            </button>
+            {POPULAR_EMOJI.map((e) => (
+              <button
+                key={e}
+                type="button"
+                className={`${styles.emojiItem} ${emoji === e ? styles.emojiItemActive : ''}`}
+                onClick={() => {
+                  hapticFeedback.light();
+                  setEmoji(e);
+                  setShowEmojiPicker(false);
+                }}
+              >
+                {e}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Сумма, Период, День */}
         <div className={styles.rowThree}>

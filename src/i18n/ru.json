@@ -96,6 +96,12 @@
   "grid": {
     "title": "Ваши подписки"
   },
+  "stats": {
+    "totalSpent": "Потрачено",
+    "yearly": "В год",
+    "perDay": "В день",
+    "monthly": "В месяц"
+  },
   "payment": {
     "title": "Требует оплаты",
     "overdue": "Просрочено на {{count}} дн.",
