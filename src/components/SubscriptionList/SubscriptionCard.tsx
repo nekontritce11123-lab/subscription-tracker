@@ -259,7 +259,7 @@ function InlineEditForm({ subscription, onSave }: InlineEditFormProps) {
       color: subscription.color,
       amount: amountNum,
       currency: 'RUB',
-      period: 'month',
+      periodMonths: 1,
       billingDay: dayNum,
       startDate: dateObj.toISOString(),
       isTrial,

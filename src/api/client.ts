@@ -9,10 +9,11 @@ type ApiSubscription = {
   color: string;
   amount: number;
   currency: 'RUB' | 'USD' | 'EUR';
-  period: 'month' | 'year';
+  periodMonths: number;
   billingDay: number;
   startDate: string;
   isTrial: boolean;
+  emoji?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -25,10 +26,11 @@ function mapApiToLocal(sub: ApiSubscription): Subscription {
     color: sub.color,
     amount: sub.amount,
     currency: sub.currency,
-    period: sub.period,
+    periodMonths: sub.periodMonths,
     billingDay: sub.billingDay,
     startDate: sub.startDate,
     isTrial: sub.isTrial,
+    emoji: sub.emoji,
     createdAt: sub.createdAt,
   };
 }
