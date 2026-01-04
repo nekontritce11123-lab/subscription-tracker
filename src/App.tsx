@@ -4,10 +4,9 @@ import { FinancialHorizon } from './components/FinancialHorizon';
 import { SubscriptionGridCard, EmptyState, AddForm, getPaymentStatus } from './components/SubscriptionList';
 import { PaymentContent } from './components/PaymentContent';
 import { Button, Toast, BottomSheet } from './components/UI';
-import { useSubscriptions, useTelegram } from './hooks';
+import { useSubscriptions, useTelegram, setApiInitData } from './hooks';
 import { getOverdueDays, isDueToday as checkIsDueToday } from './hooks/useStats';
 import { Subscription } from './types/subscription';
-import { apiClient } from './api/client';
 import styles from './App.module.css';
 
 interface DeletedItem {
@@ -21,13 +20,12 @@ function App() {
   const { subscriptions, isLoaded, addSubscription, updateSubscription, removeSubscription, restoreSubscription, getSubscription } =
     useSubscriptions();
 
-  // Initialize API client with Telegram initData
-  useEffect(() => {
-    const initData = getInitData();
-    if (initData) {
-      apiClient.setInitData(initData);
-    }
-  }, [getInitData]);
+  // Initialize API client with Telegram initData - MUST run before useSubscriptions init
+  // This is called synchronously on first render to beat the async init
+  const initData = getInitData();
+  if (initData) {
+    setApiInitData(initData);
+  }
 
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [addFormKey, setAddFormKey] = useState(0);

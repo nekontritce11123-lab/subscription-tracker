@@ -1,8 +1,18 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Subscription, Currency, Period } from '../types/subscription';
 import { apiClient } from '../api/client';
 
 const STORAGE_KEY = 'subscription_tracker_data';
+
+// Flag to track if API client has been initialized with initData
+let apiInitDataSet = false;
+
+export function setApiInitData(initData: string): void {
+  if (initData && !apiInitDataSet) {
+    apiClient.setInitData(initData);
+    apiInitDataSet = true;
+  }
+}
 
 // Миграция старых данных к новому формату
 function migrateSubscription(sub: Record<string, unknown>): Subscription {
@@ -108,19 +118,28 @@ export function useSubscriptions() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [useApi, setUseApi] = useState(false);
+  const initAttempted = useRef(false);
 
   // Initialize: try API first, fallback to localStorage
+  // Wait a tick for initData to be set from App.tsx
   useEffect(() => {
+    if (initAttempted.current) return;
+    initAttempted.current = true;
+
     async function init() {
+      // Small delay to ensure initData is set from useTelegram
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       try {
         const { subscriptions: apiSubs } = await apiClient.init();
         setSubscriptions(apiSubs);
         setUseApi(true);
         // Sync localStorage as backup
         saveToStorage(apiSubs);
-      } catch {
+        console.log('[Subscriptions] API connected, loaded', apiSubs.length, 'subscriptions');
+      } catch (error) {
         // Fallback to localStorage
-        console.log('[Subscriptions] API unavailable, using localStorage');
+        console.log('[Subscriptions] API unavailable, using localStorage:', error);
         const saved = loadFromStorage();
         setSubscriptions(saved);
         setUseApi(false);

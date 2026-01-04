@@ -82,6 +82,13 @@ WEBAPP_URL=http://217.60.3.122
 PORT=3001
 EOF""")
 
+    # Create data directory and db.json
+    print("\n=== Creating database directory ===")
+    run_command(ssh, f"mkdir -p {APP_PATH}/backend/data")
+    run_command(ssh, f"""cat > {APP_PATH}/backend/data/db.json << 'EOF'
+{{"users": [], "subscriptions": []}}
+EOF""")
+
     # Step 7: Create systemd service
     print("\n=== Creating systemd service ===")
     service_content = f"""[Unit]
@@ -116,6 +123,10 @@ EOF""")
     # Step 9: Check status
     print("\n=== Service status ===")
     run_command(ssh, f"systemctl status {SERVICE_NAME} --no-pager")
+
+    # Check logs
+    print("\n=== Recent logs ===")
+    run_command(ssh, f"journalctl -u {SERVICE_NAME} -n 30 --no-pager")
 
     # Step 10: Verify both services running
     print("\n=== All services ===")
