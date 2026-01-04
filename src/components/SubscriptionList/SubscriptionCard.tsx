@@ -56,7 +56,7 @@ export function SubscriptionCard({
   const isDragging = useRef(false);
   const hapticTriggered = useRef(false);
 
-  const daysLeft = getDaysUntil(subscription.billingDay);
+  const daysLeft = getDaysUntil(subscription.billingDay, subscription.startDate);
   const statusInfo = getStatusInfo(daysLeft, subscription.isTrial || false, t);
   const totalPaid = calculateTotalPaid(subscription.startDate, subscription.amount);
 

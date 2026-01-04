@@ -31,7 +31,7 @@ export function SubscriptionGridCard({ subscription, onTap, onLongPress }: Subsc
   const longPressTimer = useRef<number | null>(null);
   const isLongPress = useRef(false);
 
-  const daysLeft = getDaysUntil(subscription.billingDay);
+  const daysLeft = getDaysUntil(subscription.billingDay, subscription.startDate);
   const status = getStatus(daysLeft, subscription.isTrial || false);
   const statusText = getStatusText(daysLeft, t);
 

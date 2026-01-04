@@ -19,6 +19,7 @@ function App() {
     useSubscriptions();
 
   const [showAddSheet, setShowAddSheet] = useState(false);
+  const [addFormKey, setAddFormKey] = useState(0);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [deletedItem, setDeletedItem] = useState<DeletedItem | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<Subscription | null>(null);
@@ -45,6 +46,7 @@ function App() {
 
   const handleOpenAddSheet = () => {
     hapticFeedback.light();
+    setAddFormKey(k => k + 1); // Reset form
     setShowAddSheet(true);
   };
 
@@ -114,15 +116,18 @@ function App() {
           </>
         )}
 
+      </main>
+
+      {/* Fixed bottom bar with add button */}
+      <div className={styles.bottomBar}>
         <Button
           variant="primary"
           fullWidth
           onClick={handleOpenAddSheet}
-          className={styles.addButton}
         >
           + {t('form.add')}
         </Button>
-      </main>
+      </div>
 
       {/* Add subscription bottom sheet */}
       <BottomSheet
@@ -131,6 +136,7 @@ function App() {
         title={t('form.add')}
       >
         <AddForm
+          key={addFormKey}
           onAdd={handleAddNew}
           onCancel={handleCloseAddSheet}
         />

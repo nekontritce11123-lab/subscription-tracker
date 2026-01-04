@@ -1,15 +1,16 @@
 .app {
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   background-color: var(--tg-theme-bg-color);
+  overflow: hidden;
 }
 
 .main {
   flex: 1;
   padding: var(--spacing-md) var(--spacing-lg);
-  padding-bottom: calc(var(--spacing-xl) + var(--safe-area-bottom));
+  padding-bottom: var(--spacing-md);
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -33,12 +34,15 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
 }
 
-/* Add button */
-.addButton {
-  margin-top: auto;
+/* Fixed bottom bar */
+.bottomBar {
+  flex-shrink: 0;
+  padding: var(--spacing-md) var(--spacing-lg);
+  padding-bottom: calc(var(--spacing-md) + var(--safe-area-bottom));
+  background: var(--tg-theme-bg-color);
+  border-top: 1px solid var(--tg-theme-secondary-bg-color);
 }
 
 /* Delete confirmation */

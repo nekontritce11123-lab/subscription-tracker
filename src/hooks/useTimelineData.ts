@@ -27,8 +27,10 @@ export function useTimelineData(subscriptions: Subscription[]): MonthData {
     for (const sub of subscriptions) {
       // Adjust billing day if month has fewer days
       const billingDay = Math.min(sub.billingDay, daysInMonth);
-      const daysUntil = getDaysUntil(sub.billingDay);
-      const isPast = billingDay < today;
+      const daysUntil = getDaysUntil(sub.billingDay, sub.startDate);
+
+      // isPast: billing day passed OR it's today but subscription started today (already paid)
+      const isPast = billingDay < today || (billingDay === today && daysUntil > 0);
 
       totalAmount += sub.amount;
 

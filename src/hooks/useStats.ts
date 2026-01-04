@@ -4,8 +4,10 @@ import { Subscription, Stats } from '../types/subscription';
 /**
  * Calculate days until the next billing date
  * Handles edge cases like short months (Feb 28/29, months with 30 days)
+ * @param billingDay - Day of month when billing occurs
+ * @param startDate - Optional start date to check if first payment was today
  */
-export function getDaysUntil(billingDay: number): number {
+export function getDaysUntil(billingDay: number, startDate?: string): number {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const currentDay = today.getDate();
@@ -19,7 +21,19 @@ export function getDaysUntil(billingDay: number): number {
     targetDate = new Date(currentYear, currentMonth, billingDay);
   } else if (billingDay === currentDay) {
     // Today is the billing day
-    return 0;
+    // Check if this is the first payment (subscription started today)
+    if (startDate) {
+      const start = new Date(startDate);
+      const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      if (startDay.getTime() === today.getTime()) {
+        // First payment was today, next is in ~1 month
+        targetDate = new Date(currentYear, currentMonth + 1, billingDay);
+      } else {
+        return 0; // Payment is due today
+      }
+    } else {
+      return 0;
+    }
   } else {
     // Billing day has passed, calculate for next month
     targetDate = new Date(currentYear, currentMonth + 1, billingDay);
@@ -117,7 +131,7 @@ export function useStats(subscriptions: Subscription[]): Stats {
       let nextSub: Subscription | null = null;
 
       for (const sub of subscriptions) {
-        const days = getDaysUntil(sub.billingDay);
+        const days = getDaysUntil(sub.billingDay, sub.startDate);
         if (days < minDays) {
           minDays = days;
           nextSub = sub;
