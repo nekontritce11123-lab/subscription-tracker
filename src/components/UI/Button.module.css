@@ -25,8 +25,8 @@
 
 /* Variants */
 .primary {
-  background-color: var(--tg-theme-button-color);
-  color: var(--tg-theme-button-text-color);
+  background-color: var(--app-button-color);
+  color: var(--app-button-text-color);
 }
 
 .primary:active:not(:disabled) {
@@ -34,8 +34,8 @@
 }
 
 .secondary {
-  background-color: var(--tg-theme-secondary-bg-color);
-  color: var(--tg-theme-text-color);
+  background-color: var(--app-secondary-bg-color);
+  color: var(--app-text-color);
 }
 
 .secondary:active:not(:disabled) {
@@ -44,7 +44,7 @@
 
 .destructive {
   background-color: transparent;
-  color: var(--tg-theme-destructive-text-color);
+  color: var(--app-destructive-text-color);
 }
 
 .destructive:active:not(:disabled) {
@@ -53,11 +53,11 @@
 
 .ghost {
   background-color: transparent;
-  color: var(--tg-theme-button-color);
+  color: var(--app-button-color);
 }
 
 .ghost:active:not(:disabled) {
-  background-color: rgba(var(--tg-theme-button-color-rgb, 36, 129, 204), 0.1);
+  background-color: rgba(var(--app-button-color-rgb, 36, 129, 204), 0.1);
 }
 
 /* Sizes */

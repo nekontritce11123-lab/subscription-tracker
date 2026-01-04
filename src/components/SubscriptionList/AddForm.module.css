@@ -1,5 +1,5 @@
 .form {
-  background: var(--tg-theme-secondary-bg-color);
+  background: var(--app-secondary-bg-color);
   border-radius: 16px;
   padding: 12px;
   margin: 0;
@@ -31,7 +31,7 @@
   width: 24px;
   height: 24px;
   border-radius: 6px;
-  background: var(--tg-theme-bg-color);
+  background: var(--app-bg-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,7 +40,7 @@
 }
 
 .checkboxBox.checked {
-  background: var(--tg-theme-button-color);
+  background: var(--app-button-color);
 }
 
 .checkboxIcon {
@@ -51,7 +51,7 @@
 
 .checkboxLabel {
   font-size: 15px;
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
   user-select: none;
 }
 
@@ -64,7 +64,7 @@
 
 .dateLabel {
   font-size: 13px;
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   font-weight: 500;
 }
 

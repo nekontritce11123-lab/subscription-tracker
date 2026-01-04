@@ -16,8 +16,8 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-size: var(--font-size-md);
   line-height: 1.4;
-  color: var(--tg-theme-text-color);
-  background-color: var(--tg-theme-bg-color);
+  color: var(--app-text-color);
+  background-color: var(--app-bg-color);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -92,7 +92,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--tg-theme-hint-color);
+  background: var(--app-hint-color);
   border-radius: 3px;
   opacity: 0.5;
 }
@@ -106,8 +106,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* Selection */
 ::selection {
-  background-color: var(--tg-theme-button-color);
-  color: var(--tg-theme-button-text-color);
+  background-color: var(--app-button-color);
+  color: var(--app-button-text-color);
 }
 
 /* Safe area utilities */

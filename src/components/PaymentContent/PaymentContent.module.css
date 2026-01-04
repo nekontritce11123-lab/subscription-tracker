@@ -1,5 +1,5 @@
 .form {
-  background: var(--tg-theme-secondary-bg-color);
+  background: var(--app-secondary-bg-color);
   border-radius: 16px;
   padding: 12px;
   margin: 0;
@@ -40,7 +40,7 @@
 .name {
   font-size: 16px;
   font-weight: 600;
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -55,7 +55,7 @@
 .amount {
   font-size: 18px;
   font-weight: 700;
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
   flex-shrink: 0;
 }
 
@@ -68,7 +68,7 @@
 
 .dateLabel {
   font-size: 13px;
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   font-weight: 500;
 }
 

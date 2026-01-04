@@ -169,6 +169,23 @@ class ApiClient {
       throw error;
     }
   }
+
+  async syncSubscriptions(subscriptions: Subscription[]): Promise<void> {
+    try {
+      const response = await fetch(`${API_URL}/api/sync`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ subscriptions }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Sync failed: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('[API] Sync error:', error);
+      throw error;
+    }
+  }
 }
 
 export const apiClient = new ApiClient();

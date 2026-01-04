@@ -5,7 +5,7 @@
   align-items: center;
   gap: var(--spacing-xs);
   padding: var(--spacing-md);
-  background: var(--tg-theme-secondary-bg-color);
+  background: var(--app-secondary-bg-color);
   border-radius: var(--radius-lg);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -47,7 +47,7 @@
 .card.trial {
   background: linear-gradient(135deg,
     rgba(52, 199, 89, 0.08) 0%,
-    var(--tg-theme-secondary-bg-color) 100%
+    var(--app-secondary-bg-color) 100%
   );
 }
 
@@ -87,7 +87,7 @@
 .name {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
   text-align: center;
   line-height: 1.2;
   max-width: 100%;
@@ -99,7 +99,7 @@
 /* Status */
 .status {
   font-size: var(--font-size-xs);
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   text-align: center;
 }
 
@@ -107,5 +107,5 @@
 .price {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
 }

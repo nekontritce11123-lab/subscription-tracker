@@ -62,6 +62,14 @@ interface TelegramWebApp {
   isExpanded: boolean;
   viewportHeight: number;
   viewportStableHeight: number;
+  CloudStorage: {
+    setItem: (key: string, value: string, callback?: (error: Error | null, stored: boolean) => void) => void;
+    getItem: (key: string, callback: (error: Error | null, value: string | null) => void) => void;
+    getItems: (keys: string[], callback: (error: Error | null, values: Record<string, string>) => void) => void;
+    removeItem: (key: string, callback?: (error: Error | null, removed: boolean) => void) => void;
+    removeItems: (keys: string[], callback?: (error: Error | null, removed: boolean) => void) => void;
+    getKeys: (callback: (error: Error | null, keys: string[]) => void) => void;
+  };
 }
 
 export function useTelegram() {

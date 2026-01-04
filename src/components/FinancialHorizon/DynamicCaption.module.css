@@ -11,26 +11,26 @@
 .name {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
 }
 
 .dot {
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
 }
 
 .time {
   font-size: var(--font-size-md);
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
 }
 
 .amount {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
-  color: var(--tg-theme-button-color);
+  color: var(--app-button-color);
 }
 
 .empty {
   font-size: var(--font-size-md);
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   font-style: italic;
 }

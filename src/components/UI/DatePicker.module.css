@@ -1,5 +1,5 @@
 .calendar {
-  background: var(--tg-theme-bg-color);
+  background: var(--app-bg-color);
   border-radius: 12px;
   padding: 8px;
   margin-top: 4px;
@@ -18,7 +18,7 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--tg-theme-button-color);
+  color: var(--app-button-color);
   font-size: 20px;
   font-weight: 600;
   cursor: pointer;
@@ -29,7 +29,7 @@
 }
 
 .navButton:active {
-  background: rgba(var(--tg-theme-button-color-rgb), 0.1);
+  background: rgba(var(--app-button-color-rgb), 0.1);
 }
 
 .navButton:disabled {
@@ -40,7 +40,7 @@
 .monthYear {
   font-size: 15px;
   font-weight: 600;
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
 }
 
 .weekdays {
@@ -54,7 +54,7 @@
   text-align: center;
   font-size: 11px;
   font-weight: 500;
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   padding: 2px;
 }
 
@@ -75,7 +75,7 @@
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -90,12 +90,12 @@
 }
 
 .day.today {
-  border: 1px solid var(--tg-theme-button-color);
+  border: 1px solid var(--app-button-color);
 }
 
 .day.selected {
-  background: var(--tg-theme-button-color);
-  color: var(--tg-theme-button-text-color);
+  background: var(--app-button-color);
+  color: var(--app-button-text-color);
 }
 
 .day.disabled {

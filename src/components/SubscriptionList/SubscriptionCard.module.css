@@ -30,7 +30,7 @@
   position: relative;
   min-height: 64px;
   padding: var(--spacing-lg);
-  background: var(--tg-theme-secondary-bg-color);
+  background: var(--app-secondary-bg-color);
   border-radius: var(--radius-lg);
   touch-action: pan-y;
   cursor: pointer;
@@ -61,7 +61,7 @@
 .name {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -70,7 +70,7 @@
 /* Status with emoji */
 .status {
   font-size: var(--font-size-sm);
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
 }
 
 .status.urgent {
@@ -86,7 +86,7 @@
 }
 
 .status.normal {
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
 }
 
 /* Price section */
@@ -100,14 +100,14 @@
 .price {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
   font-variant-numeric: tabular-nums;
 }
 
 /* LTV */
 .ltv {
   font-size: var(--font-size-xs);
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   font-weight: var(--font-weight-normal);
 }
 

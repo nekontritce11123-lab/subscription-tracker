@@ -14,23 +14,23 @@
 .company {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
-  color: var(--tg-theme-button-color);
+  color: var(--app-button-color);
 }
 
 .divider {
   font-size: var(--font-size-md);
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   font-weight: var(--font-weight-light);
 }
 
 .productName {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
 }
 
 .total {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
 }

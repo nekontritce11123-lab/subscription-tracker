@@ -7,7 +7,7 @@
 
 .label {
   font-size: 12px;
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   font-weight: 500;
   padding-left: 4px;
 }
@@ -15,7 +15,7 @@
 .inputWrapper {
   display: flex;
   align-items: center;
-  background-color: var(--tg-theme-bg-color);
+  background-color: var(--app-bg-color);
   border-radius: 10px;
   padding: 12px 14px;
   height: 44px;
@@ -31,14 +31,14 @@
   padding: 0;
   margin: 0;
   font-size: 17px;
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
   background: transparent;
   border: none;
   outline: none;
 }
 
 .input::placeholder {
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
 }
 
 .input:focus {
@@ -46,7 +46,7 @@
 }
 
 .suffix {
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   font-size: 17px;
   margin-left: 8px;
   flex-shrink: 0;
@@ -54,6 +54,6 @@
 
 .error {
   font-size: 12px;
-  color: var(--tg-theme-destructive-text-color);
+  color: var(--app-destructive-text-color);
   padding-left: 4px;
 }

@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Subscription, Currency, Period } from '../types/subscription';
 import { apiClient } from '../api/client';
 
-const STORAGE_KEY = 'subscription_tracker_data';
+const STORAGE_KEY = 'subscriptions';
+const LOCAL_STORAGE_KEY = 'subscription_tracker_data';
 
 // Flag to track if API client has been initialized with initData
 let apiInitDataSet = false;
@@ -13,6 +14,55 @@ export function setApiInitData(initData: string): void {
     apiInitDataSet = true;
   }
 }
+
+// CloudStorage wrapper with Promise API
+const cloudStorage = {
+  isAvailable(): boolean {
+    return !!window.Telegram?.WebApp?.CloudStorage;
+  },
+
+  getItem(key: string): Promise<string | null> {
+    return new Promise((resolve, reject) => {
+      const cs = window.Telegram?.WebApp?.CloudStorage;
+      if (!cs) {
+        reject(new Error('CloudStorage not available'));
+        return;
+      }
+      cs.getItem(key, (error, value) => {
+        if (error) reject(error);
+        else resolve(value);
+      });
+    });
+  },
+
+  setItem(key: string, value: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const cs = window.Telegram?.WebApp?.CloudStorage;
+      if (!cs) {
+        reject(new Error('CloudStorage not available'));
+        return;
+      }
+      cs.setItem(key, value, (error, stored) => {
+        if (error) reject(error);
+        else resolve(stored);
+      });
+    });
+  },
+
+  removeItem(key: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const cs = window.Telegram?.WebApp?.CloudStorage;
+      if (!cs) {
+        reject(new Error('CloudStorage not available'));
+        return;
+      }
+      cs.removeItem(key, (error, removed) => {
+        if (error) reject(error);
+        else resolve(removed);
+      });
+    });
+  }
+};
 
 // Миграция старых данных к новому формату
 function migrateSubscription(sub: Record<string, unknown>): Subscription {
@@ -51,9 +101,9 @@ function validateSubscription(sub: unknown): sub is Subscription {
   );
 }
 
-function loadFromStorage(): Subscription[] {
+function loadFromLocalStorage(): Subscription[] {
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!data) {
       return [];
     }
@@ -63,26 +113,49 @@ function loadFromStorage(): Subscription[] {
       return [];
     }
 
-    const migrated = parsed
+    return parsed
       .filter(validateSubscription)
       .map((sub: unknown) => migrateSubscription(sub as Record<string, unknown>));
-
-    if (migrated.length > 0) {
-      saveToStorage(migrated);
-    }
-
-    return migrated;
   } catch (error) {
-    console.error('Failed to load subscriptions:', error);
+    console.error('Failed to load from localStorage:', error);
     return [];
   }
 }
 
-function saveToStorage(subscriptions: Subscription[]): void {
+function saveToLocalStorage(subscriptions: Subscription[]): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(subscriptions));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(subscriptions));
   } catch (error) {
-    console.error('Failed to save subscriptions:', error);
+    console.error('Failed to save to localStorage:', error);
+  }
+}
+
+async function loadFromCloudStorage(): Promise<Subscription[]> {
+  try {
+    const data = await cloudStorage.getItem(STORAGE_KEY);
+    if (!data) {
+      return [];
+    }
+
+    const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed
+      .filter(validateSubscription)
+      .map((sub: unknown) => migrateSubscription(sub as Record<string, unknown>));
+  } catch (error) {
+    console.error('Failed to load from CloudStorage:', error);
+    return [];
+  }
+}
+
+async function saveToCloudStorage(subscriptions: Subscription[]): Promise<void> {
+  try {
+    await cloudStorage.setItem(STORAGE_KEY, JSON.stringify(subscriptions));
+  } catch (error) {
+    console.error('Failed to save to CloudStorage:', error);
   }
 }
 
@@ -114,148 +187,137 @@ function getDaysUntilPayment(billingDay: number): number {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
+// Sync subscriptions to backend for notifications
+async function syncToBackend(subscriptions: Subscription[]): Promise<void> {
+  try {
+    await apiClient.syncSubscriptions(subscriptions);
+    console.log('[Subscriptions] Synced to backend for notifications');
+  } catch (error) {
+    console.error('[Subscriptions] Failed to sync to backend:', error);
+  }
+}
+
 export function useSubscriptions() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [useApi, setUseApi] = useState(false);
+  const [useCloudStorage, setUseCloudStorage] = useState(false);
   const initAttempted = useRef(false);
 
-  // Initialize: try API first, fallback to localStorage
-  // Wait a tick for initData to be set from App.tsx
+  // Save function that saves to appropriate storage
+  const save = useCallback(async (subs: Subscription[]) => {
+    // Always save to localStorage as backup
+    saveToLocalStorage(subs);
+
+    // Save to CloudStorage if available
+    if (useCloudStorage) {
+      await saveToCloudStorage(subs);
+    }
+
+    // Sync to backend for notifications (fire and forget)
+    syncToBackend(subs);
+  }, [useCloudStorage]);
+
+  // Initialize: try CloudStorage first, fallback to localStorage
   useEffect(() => {
     if (initAttempted.current) return;
     initAttempted.current = true;
 
     async function init() {
-      // Small delay to ensure initData is set from useTelegram
+      // Small delay to ensure Telegram WebApp is ready
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      try {
-        const { subscriptions: apiSubs } = await apiClient.init();
-        setSubscriptions(apiSubs);
-        setUseApi(true);
-        // Sync localStorage as backup
-        saveToStorage(apiSubs);
-        console.log('[Subscriptions] API connected, loaded', apiSubs.length, 'subscriptions');
-      } catch (error) {
-        // Fallback to localStorage
-        console.log('[Subscriptions] API unavailable, using localStorage:', error);
-        const saved = loadFromStorage();
-        setSubscriptions(saved);
-        setUseApi(false);
+      let loaded: Subscription[] = [];
+
+      if (cloudStorage.isAvailable()) {
+        console.log('[Subscriptions] CloudStorage available, loading...');
+        loaded = await loadFromCloudStorage();
+        setUseCloudStorage(true);
+
+        // If CloudStorage is empty, try to migrate from localStorage
+        if (loaded.length === 0) {
+          const localData = loadFromLocalStorage();
+          if (localData.length > 0) {
+            console.log('[Subscriptions] Migrating', localData.length, 'subscriptions from localStorage to CloudStorage');
+            loaded = localData;
+            await saveToCloudStorage(loaded);
+          }
+        }
+
+        console.log('[Subscriptions] Loaded', loaded.length, 'subscriptions from CloudStorage');
+      } else {
+        // Fallback to localStorage (development mode)
+        console.log('[Subscriptions] CloudStorage not available, using localStorage');
+        loaded = loadFromLocalStorage();
+        setUseCloudStorage(false);
       }
+
+      setSubscriptions(loaded);
       setIsLoaded(true);
+
+      // Sync to backend for notifications
+      if (loaded.length > 0) {
+        syncToBackend(loaded);
+      }
     }
 
     init();
   }, []);
 
   const addSubscription = useCallback(async (data: Omit<Subscription, 'id' | 'createdAt'>) => {
-    // Optimistic update
-    const tempSubscription: Subscription = {
+    const newSubscription: Subscription = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
     };
 
     setSubscriptions((prev) => {
-      const updated = [...prev, tempSubscription];
-      saveToStorage(updated);
+      const updated = [...prev, newSubscription];
+      save(updated);
       return updated;
     });
 
-    if (useApi) {
-      try {
-        const apiSubscription = await apiClient.createSubscription(data);
-        // Replace temp with real API response
-        setSubscriptions((prev) => {
-          const updated = prev.map((sub) =>
-            sub.id === tempSubscription.id ? apiSubscription : sub
-          );
-          saveToStorage(updated);
-          return updated;
-        });
-        return apiSubscription;
-      } catch (error) {
-        console.error('[Subscriptions] API create failed:', error);
-      }
-    }
-
-    return tempSubscription;
-  }, [useApi]);
+    return newSubscription;
+  }, [save]);
 
   const updateSubscription = useCallback(async (id: string, data: Partial<Subscription>) => {
-    // Optimistic update
     setSubscriptions((prev) => {
       const updated = prev.map((sub) =>
         sub.id === id ? { ...sub, ...data } : sub
       );
-      saveToStorage(updated);
+      save(updated);
       return updated;
     });
-
-    if (useApi) {
-      try {
-        await apiClient.updateSubscription(id, data);
-      } catch (error) {
-        console.error('[Subscriptions] API update failed:', error);
-      }
-    }
-  }, [useApi]);
+  }, [save]);
 
   const removeSubscription = useCallback(async (id: string) => {
-    // Optimistic update
     setSubscriptions((prev) => {
       const updated = prev.filter((sub) => sub.id !== id);
-      saveToStorage(updated);
+      save(updated);
       return updated;
     });
-
-    if (useApi) {
-      try {
-        await apiClient.deleteSubscription(id);
-      } catch (error) {
-        console.error('[Subscriptions] API delete failed:', error);
-      }
-    }
-  }, [useApi]);
+  }, [save]);
 
   const restoreSubscription = useCallback((subscription: Subscription, index: number) => {
     setSubscriptions((prev) => {
       const updated = [...prev];
       const insertIndex = Math.min(index, updated.length);
       updated.splice(insertIndex, 0, subscription);
-      saveToStorage(updated);
+      save(updated);
       return updated;
     });
-
-    // Re-create on API if available
-    if (useApi) {
-      const { id, createdAt, ...data } = subscription;
-      apiClient.createSubscription(data).catch(console.error);
-    }
-  }, [useApi]);
+  }, [save]);
 
   const markAsPaid = useCallback(async (id: string, paidDate?: string) => {
     const date = paidDate || new Date().toISOString().split('T')[0];
 
-    // Optimistic update
     setSubscriptions((prev) => {
       const updated = prev.map((sub) =>
         sub.id === id ? { ...sub, startDate: date, isTrial: false } : sub
       );
-      saveToStorage(updated);
+      save(updated);
       return updated;
     });
-
-    if (useApi) {
-      try {
-        await apiClient.markAsPaid(id, paidDate);
-      } catch (error) {
-        console.error('[Subscriptions] API mark paid failed:', error);
-      }
-    }
-  }, [useApi]);
+  }, [save]);
 
   const getSubscription = useCallback(
     (id: string) => subscriptions.find((sub) => sub.id === id),
@@ -274,7 +336,7 @@ export function useSubscriptions() {
   return {
     subscriptions: sortedSubscriptions,
     isLoaded,
-    isApiConnected: useApi,
+    isCloudStorageEnabled: useCloudStorage,
     addSubscription,
     updateSubscription,
     removeSubscription,

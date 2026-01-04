@@ -113,3 +113,52 @@ export async function getAllSubscriptions(): Promise<Subscription[]> {
   await db.read();
   return db.data.subscriptions;
 }
+
+/**
+ * Sync subscriptions from CloudStorage
+ * Replaces all subscriptions for a user with the provided list
+ */
+export async function syncSubscriptions(
+  userId: number,
+  subscriptions: Array<{
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+    amount: number;
+    currency: 'RUB' | 'USD' | 'EUR';
+    period: 'month' | 'year';
+    billingDay: number;
+    startDate: string;
+    isTrial: boolean;
+    createdAt: string;
+  }>
+): Promise<void> {
+  await db.read();
+
+  // Remove all existing subscriptions for this user
+  db.data.subscriptions = db.data.subscriptions.filter(sub => sub.userId !== userId);
+
+  // Add new subscriptions
+  const now = new Date().toISOString();
+  const newSubscriptions: Subscription[] = subscriptions.map(sub => ({
+    id: sub.id,
+    userId,
+    name: sub.name,
+    icon: sub.icon || sub.name.charAt(0).toUpperCase(),
+    color: sub.color || '#007AFF',
+    amount: sub.amount,
+    currency: sub.currency || 'RUB',
+    period: sub.period || 'month',
+    billingDay: sub.billingDay,
+    startDate: sub.startDate,
+    isTrial: sub.isTrial || false,
+    createdAt: sub.createdAt || now,
+    updatedAt: now,
+  }));
+
+  db.data.subscriptions.push(...newSubscriptions);
+  await db.write();
+
+  console.log(`[Subscriptions] Synced ${subscriptions.length} subscriptions for user ${userId}`);
+}

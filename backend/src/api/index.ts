@@ -4,6 +4,7 @@ import { config } from '../config.js';
 import { authMiddleware, devAuthMiddleware } from './middleware/auth.js';
 import authRoutes from './routes/auth.js';
 import subscriptionRoutes from './routes/subscriptions.js';
+import syncRoutes from './routes/sync.js';
 
 const app = express();
 
@@ -27,6 +28,7 @@ const auth = process.env.NODE_ENV === 'production'
 // Routes
 app.use('/api/auth', auth, authRoutes);
 app.use('/api/subscriptions', auth, subscriptionRoutes);
+app.use('/api/sync', auth, syncRoutes);
 
 // Error handling
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

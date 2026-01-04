@@ -1,22 +1,22 @@
 :root {
-  /* Telegram Native Variables (fallbacks for development) */
-  --tg-theme-bg-color: #ffffff;
-  --tg-theme-secondary-bg-color: #f4f4f5;
-  --tg-theme-text-color: #000000;
-  --tg-theme-hint-color: #999999;
-  --tg-theme-link-color: #2481cc;
-  --tg-theme-button-color: #2481cc;
-  --tg-theme-button-text-color: #ffffff;
-  --tg-theme-destructive-text-color: #ff3b30;
-  --tg-theme-header-bg-color: #ffffff;
-  --tg-theme-accent-text-color: #2481cc;
-  --tg-theme-section-bg-color: #ffffff;
-  --tg-theme-section-header-text-color: #6d6d72;
-  --tg-theme-subtitle-text-color: #999999;
+  /* App Theme Colors (fixed dark theme) */
+  --app-bg-color: #18222d;
+  --app-secondary-bg-color: #232e3c;
+  --app-text-color: #ffffff;
+  --app-hint-color: #708499;
+  --app-link-color: #6ab2f2;
+  --app-button-color: #5288c1;
+  --app-button-text-color: #ffffff;
+  --app-destructive-text-color: #ff6b6b;
+  --app-header-bg-color: #18222d;
+  --app-accent-text-color: #6ab2f2;
+  --app-section-bg-color: #232e3c;
+  --app-section-header-text-color: #708499;
+  --app-subtitle-text-color: #708499;
 
   /* RGB versions for rgba() usage */
-  --tg-theme-bg-color-rgb: 255, 255, 255;
-  --tg-theme-secondary-bg-color-rgb: 244, 244, 245;
+  --app-bg-color-rgb: 24, 34, 45;
+  --app-secondary-bg-color-rgb: 35, 46, 60;
 
   /* Custom Semantic Colors */
   --urgent: #ff3b30;
@@ -73,25 +73,7 @@
   --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
-}
-
-/* Dark theme support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --tg-theme-bg-color: #18222d;
-    --tg-theme-secondary-bg-color: #232e3c;
-    --tg-theme-text-color: #ffffff;
-    --tg-theme-hint-color: #708499;
-    --tg-theme-link-color: #6ab2f2;
-    --tg-theme-button-color: #5288c1;
-    --tg-theme-button-text-color: #ffffff;
-    --tg-theme-destructive-text-color: #ff6b6b;
-
-    /* RGB versions for dark theme */
-    --tg-theme-bg-color-rgb: 24, 34, 45;
-    --tg-theme-secondary-bg-color-rgb: 35, 46, 60;
-  }
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.25);
 }

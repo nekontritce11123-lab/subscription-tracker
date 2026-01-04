@@ -3,10 +3,10 @@
   top: 0;
   z-index: 100;
   padding: calc(var(--safe-area-top) + var(--spacing-lg)) var(--spacing-lg) var(--spacing-lg);
-  background: rgba(var(--tg-theme-bg-color-rgb), 0.92);
+  background: rgba(var(--app-bg-color-rgb), 0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 0.5px solid rgba(var(--tg-theme-secondary-bg-color-rgb), 0.5);
+  border-bottom: 0.5px solid rgba(var(--app-secondary-bg-color-rgb), 0.5);
 }
 
 /* Main stats - большая сумма по центру */
@@ -19,7 +19,7 @@
 
 .mainLabel {
   font-size: var(--font-size-sm);
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -28,7 +28,7 @@
 .mainValue {
   font-size: 42px;
   font-weight: var(--font-weight-bold);
-  color: var(--tg-theme-button-color);
+  color: var(--app-button-color);
   line-height: 1;
   letter-spacing: -1px;
   font-variant-numeric: tabular-nums;
@@ -45,13 +45,13 @@
 
 .secondaryLabel {
   font-size: var(--font-size-sm);
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
 }
 
 .secondaryValue {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
   font-variant-numeric: tabular-nums;
 }
 
@@ -59,7 +59,7 @@
   margin-top: var(--spacing-sm);
   text-align: center;
   font-size: var(--font-size-sm);
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   animation: fadeIn var(--animation-normal) ease-out;
 }
 

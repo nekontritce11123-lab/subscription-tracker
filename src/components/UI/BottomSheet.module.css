@@ -34,7 +34,7 @@
 .sheet {
   width: 100%;
   max-height: 90vh;
-  background: var(--tg-theme-bg-color);
+  background: var(--app-bg-color);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-xl);
   padding-bottom: calc(var(--spacing-xl) + var(--safe-area-bottom));
@@ -68,7 +68,7 @@
 .handle {
   width: 36px;
   height: 4px;
-  background: rgba(var(--tg-theme-hint-color-rgb), 0.3);
+  background: rgba(var(--app-hint-color-rgb), 0.3);
   border-radius: 2px;
   margin: 0 auto var(--spacing-md);
 }
@@ -76,7 +76,7 @@
 .title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
   text-align: center;
   margin: 0 0 var(--spacing-lg);
 }

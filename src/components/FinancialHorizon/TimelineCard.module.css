@@ -13,7 +13,7 @@
   width: 44px;
   height: 44px;
   border-radius: var(--radius-md);
-  background: rgba(var(--tg-theme-secondary-bg-color-rgb), 0.5);
+  background: rgba(var(--app-secondary-bg-color-rgb), 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,8 +27,8 @@
 
 /* Today - blue border */
 .card.today .content {
-  border: 2px solid var(--tg-theme-button-color);
-  background: rgba(var(--tg-theme-button-color-rgb), 0.1);
+  border: 2px solid var(--app-button-color);
+  background: rgba(var(--app-button-color-rgb), 0.1);
 }
 
 /* Selected state */
@@ -41,13 +41,13 @@
 .count {
   font-size: 18px;
   font-weight: var(--font-weight-bold);
-  color: var(--tg-theme-text-color);
+  color: var(--app-text-color);
 }
 
 /* Day number */
 .dayNumber {
   font-size: var(--font-size-xs);
-  color: var(--tg-theme-hint-color);
+  color: var(--app-hint-color);
   font-variant-numeric: tabular-nums;
   font-weight: var(--font-weight-medium);
 }
@@ -57,7 +57,7 @@
 }
 
 .card.today .dayNumber {
-  color: var(--tg-theme-button-color);
+  color: var(--app-button-color);
   font-weight: var(--font-weight-bold);
 }
 
@@ -67,7 +67,7 @@
   bottom: -18px;
   font-size: 9px;
   font-weight: var(--font-weight-bold);
-  color: var(--tg-theme-button-color);
+  color: var(--app-button-color);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   white-space: nowrap;
