@@ -5,6 +5,7 @@ import styles from './DatePicker.module.css';
 interface DatePickerProps {
   value: string;
   onChange: (date: string) => void;
+  minDate?: Date;
   maxDate?: Date;
 }
 
@@ -21,7 +22,7 @@ const MONTHS_EN = [
 const WEEKDAYS_RU = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 const WEEKDAYS_EN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-export function DatePicker({ value, onChange, maxDate }: DatePickerProps) {
+export function DatePicker({ value, onChange, minDate, maxDate }: DatePickerProps) {
   const { i18n } = useTranslation();
   const isRu = i18n.language === 'ru';
 
@@ -41,6 +42,7 @@ export function DatePicker({ value, onChange, maxDate }: DatePickerProps) {
   const selectedDate = value ? parseLocalDate(value) : null;
   const today = new Date();
   const max = maxDate || today;
+  const min = minDate || null;
 
   const daysInMonth = useMemo(() => {
     const days: (number | null)[] = [];
@@ -65,12 +67,17 @@ export function DatePicker({ value, onChange, maxDate }: DatePickerProps) {
   }, [viewYear, viewMonth]);
 
   const handlePrevMonth = () => {
-    if (viewMonth === 0) {
-      setViewMonth(11);
-      setViewYear(viewYear - 1);
-    } else {
-      setViewMonth(viewMonth - 1);
+    const prevMonth = viewMonth === 0 ? 11 : viewMonth - 1;
+    const prevYear = viewMonth === 0 ? viewYear - 1 : viewYear;
+
+    // Don't go before min date month
+    if (min) {
+      const lastDayOfPrevMonth = new Date(prevYear, prevMonth + 1, 0);
+      if (lastDayOfPrevMonth < min) return;
     }
+
+    setViewMonth(prevMonth);
+    setViewYear(prevYear);
   };
 
   const handleNextMonth = () => {
@@ -86,7 +93,7 @@ export function DatePicker({ value, onChange, maxDate }: DatePickerProps) {
 
   const handleDayClick = (day: number) => {
     const date = new Date(viewYear, viewMonth, day);
-    if (date <= max) {
+    if (date <= max && (!min || date >= min)) {
       // Format as YYYY-MM-DD without UTC conversion
       const yyyy = viewYear;
       const mm = String(viewMonth + 1).padStart(2, '0');
@@ -106,7 +113,10 @@ export function DatePicker({ value, onChange, maxDate }: DatePickerProps) {
 
   const isDisabled = (day: number) => {
     const date = new Date(viewYear, viewMonth, day);
-    return date > max;
+    // Disabled if after max OR before min
+    if (date > max) return true;
+    if (min && date < min) return true;
+    return false;
   };
 
   const isToday = (day: number) => {
@@ -115,6 +125,14 @@ export function DatePicker({ value, onChange, maxDate }: DatePickerProps) {
       today.getMonth() === viewMonth &&
       today.getFullYear() === viewYear
     );
+  };
+
+  const canGoPrev = () => {
+    if (!min) return true;
+    const prevMonth = viewMonth === 0 ? 11 : viewMonth - 1;
+    const prevYear = viewMonth === 0 ? viewYear - 1 : viewYear;
+    const lastDayOfPrevMonth = new Date(prevYear, prevMonth + 1, 0);
+    return lastDayOfPrevMonth >= min;
   };
 
   const canGoNext = () => {
@@ -126,7 +144,12 @@ export function DatePicker({ value, onChange, maxDate }: DatePickerProps) {
   return (
     <div className={styles.calendar}>
       <div className={styles.header}>
-        <button type="button" className={styles.navButton} onClick={handlePrevMonth}>
+        <button
+          type="button"
+          className={styles.navButton}
+          onClick={handlePrevMonth}
+          disabled={!canGoPrev()}
+        >
           ‹
         </button>
         <span className={styles.monthYear}>

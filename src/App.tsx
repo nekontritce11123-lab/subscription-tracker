@@ -1,9 +1,11 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FinancialHorizon } from './components/FinancialHorizon';
-import { SubscriptionGridCard, EmptyState, AddForm } from './components/SubscriptionList';
+import { SubscriptionGridCard, EmptyState, AddForm, getPaymentStatus } from './components/SubscriptionList';
+import { PaymentContent } from './components/PaymentContent';
 import { Button, Toast, BottomSheet } from './components/UI';
 import { useSubscriptions, useTelegram } from './hooks';
+import { getOverdueDays, isDueToday as checkIsDueToday } from './hooks/useStats';
 import { Subscription } from './types/subscription';
 import styles from './App.module.css';
 
@@ -21,6 +23,7 @@ function App() {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [addFormKey, setAddFormKey] = useState(0);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const [paymentSubscription, setPaymentSubscription] = useState<Subscription | null>(null);
   const [deletedItem, setDeletedItem] = useState<DeletedItem | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<Subscription | null>(null);
 
@@ -37,7 +40,12 @@ function App() {
   };
 
   const handleCardTap = (subscription: Subscription) => {
-    setEditingSubscription(subscription);
+    const status = getPaymentStatus(subscription);
+    if (status === 'overdue' || status === 'dueToday') {
+      setPaymentSubscription(subscription);
+    } else {
+      setEditingSubscription(subscription);
+    }
   };
 
   const handleCardLongPress = (subscription: Subscription) => {
@@ -56,6 +64,37 @@ function App() {
 
   const handleCloseEditSheet = () => {
     setEditingSubscription(null);
+  };
+
+  const handleClosePaymentSheet = () => {
+    setPaymentSubscription(null);
+  };
+
+  const handlePaidOnDate = (date: Date) => {
+    if (!paymentSubscription) return;
+    // Если дата сегодня, не меняем billingDay
+    const today = new Date();
+    const isToday = date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+
+    if (isToday) {
+      updateSubscription(paymentSubscription.id, {
+        startDate: date.toISOString(),
+      });
+    } else {
+      updateSubscription(paymentSubscription.id, {
+        startDate: date.toISOString(),
+        billingDay: date.getDate(),
+      });
+    }
+    setPaymentSubscription(null);
+  };
+
+  const handleCancelSubscription = () => {
+    if (!paymentSubscription) return;
+    removeSubscription(paymentSubscription.id);
+    setPaymentSubscription(null);
   };
 
   const handleConfirmDelete = () => {
@@ -153,6 +192,22 @@ function App() {
             onAdd={handleUpdate}
             onCancel={handleCloseEditSheet}
             editingSubscription={editingSubscription}
+          />
+        )}
+      </BottomSheet>
+
+      {/* Payment confirmation bottom sheet */}
+      <BottomSheet
+        isOpen={!!paymentSubscription}
+        onClose={handleClosePaymentSheet}
+      >
+        {paymentSubscription && (
+          <PaymentContent
+            subscription={paymentSubscription}
+            overdueDays={getOverdueDays(paymentSubscription.billingDay)}
+            isDueToday={checkIsDueToday(paymentSubscription.billingDay, paymentSubscription.startDate)}
+            onPaidOnDate={handlePaidOnDate}
+            onCancel={handleCancelSubscription}
           />
         )}
       </BottomSheet>

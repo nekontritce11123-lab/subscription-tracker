@@ -44,10 +44,14 @@ function validateSubscription(sub: unknown): sub is Subscription {
 function loadFromStorage(): Subscription[] {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) return [];
+    if (!data) {
+      return [];
+    }
 
     const parsed = JSON.parse(data);
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
 
     // Validate, migrate and filter out invalid entries
     const migrated = parsed

@@ -89,6 +89,48 @@ export function getUrgencyLevel(daysLeft: number): 'urgent' | 'warning' | 'norma
   return 'normal';
 }
 
+/**
+ * Check if a subscription payment is overdue
+ * Overdue means: billing day has passed this month AND we haven't paid yet this month
+ */
+export function isOverdue(billingDay: number, startDate: string): boolean {
+  const now = new Date();
+  const today = now.getDate();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  // If billing day hasn't passed yet this month, not overdue
+  if (billingDay >= today) return false;
+
+  // Check if payment was made this month (startDate is in current month)
+  const start = new Date(startDate);
+  const paidThisMonth =
+    start.getMonth() === currentMonth &&
+    start.getFullYear() === currentYear;
+
+  // If paid this month, not overdue
+  if (paidThisMonth) return false;
+
+  // Billing day passed and no payment this month = overdue
+  return true;
+}
+
+/**
+ * Check if a subscription payment is due today
+ */
+export function isDueToday(billingDay: number, startDate: string): boolean {
+  const daysUntil = getDaysUntil(billingDay, startDate);
+  return daysUntil === 0;
+}
+
+/**
+ * Get number of days a payment is overdue
+ */
+export function getOverdueDays(billingDay: number): number {
+  const today = new Date().getDate();
+  return Math.max(0, today - billingDay);
+}
+
 export function formatDaysLeft(
   daysLeft: number,
   t: (key: string, options?: Record<string, unknown>) => string

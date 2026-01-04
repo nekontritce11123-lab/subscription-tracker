@@ -25,7 +25,10 @@
     "billingTomorrow": "Tomorrow!",
     "billingIn": "In {{count}} days",
     "billingIn_one": "In {{count}} day",
-    "billingIn_other": "In {{count}} days"
+    "billingIn_other": "In {{count}} days",
+    "overdue": "{{count}} days overdue",
+    "overdue_one": "{{count}} day overdue",
+    "overdue_other": "{{count}} days overdue"
   },
   "form": {
     "add": "Add subscription",
@@ -84,5 +87,18 @@
   },
   "grid": {
     "title": "Your subscriptions"
+  },
+  "payment": {
+    "title": "Payment required",
+    "overdue": "{{count}} days overdue",
+    "overdue_one": "{{count}} day overdue",
+    "overdue_other": "{{count}} days overdue",
+    "dueToday": "Payment due today",
+    "whenPaid": "When did you pay?",
+    "paidToday": "Paid today",
+    "selectDate": "Select payment date",
+    "cancelled": "Cancelled subscription",
+    "back": "Back",
+    "confirm": "Confirm"
   }
 }

@@ -1,4 +1,4 @@
 export { SubscriptionCard } from './SubscriptionCard';
-export { SubscriptionGridCard } from './SubscriptionGridCard';
+export { SubscriptionGridCard, getPaymentStatus } from './SubscriptionGridCard';
 export { EmptyState } from './EmptyState';
 export { AddForm } from './AddForm';

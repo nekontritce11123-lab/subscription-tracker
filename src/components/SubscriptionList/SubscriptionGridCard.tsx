@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Subscription } from '../../types/subscription';
-import { getDaysUntil } from '../../hooks/useStats';
+import { getDaysUntil, isOverdue, isDueToday, getOverdueDays } from '../../hooks/useStats';
 import { useTelegram } from '../../hooks/useTelegram';
 import styles from './SubscriptionGridCard.module.css';
 
@@ -11,16 +11,39 @@ interface SubscriptionGridCardProps {
   onLongPress: () => void;
 }
 
-type StatusType = 'urgent' | 'trial' | 'normal';
+export type PaymentStatus = 'overdue' | 'dueToday' | 'urgent' | 'trial' | 'normal';
 
-function getStatus(daysLeft: number, isTrial: boolean): StatusType {
+function getPaymentStatus(subscription: Subscription): PaymentStatus {
+  const { billingDay, startDate, isTrial } = subscription;
+
+  // Check overdue first (highest priority)
+  if (isOverdue(billingDay, startDate)) return 'overdue';
+
+  // Check if due today
+  if (isDueToday(billingDay, startDate)) return 'dueToday';
+
+  // Trial period
   if (isTrial) return 'trial';
+
+  // Check urgent (1 day left)
+  const daysLeft = getDaysUntil(billingDay, startDate);
   if (daysLeft <= 1) return 'urgent';
+
   return 'normal';
 }
 
-function getStatusText(daysLeft: number, t: (key: string, options?: Record<string, unknown>) => string): string {
-  if (daysLeft === 0) return t('card.billingToday');
+function getStatusText(
+  status: PaymentStatus,
+  daysLeft: number,
+  overdueDays: number,
+  t: (key: string, options?: Record<string, unknown>) => string
+): string {
+  if (status === 'overdue') {
+    return t('card.overdue', { count: overdueDays });
+  }
+  if (status === 'dueToday') {
+    return t('card.billingToday');
+  }
   if (daysLeft === 1) return t('card.billingTomorrow');
   return t('card.billingIn', { count: daysLeft });
 }
@@ -29,16 +52,17 @@ export function SubscriptionGridCard({ subscription, onTap, onLongPress }: Subsc
   const { t } = useTranslation();
   const { hapticFeedback } = useTelegram();
   const longPressTimer = useRef<number | null>(null);
-  const isLongPress = useRef(false);
+  const isLongPressRef = useRef(false);
 
   const daysLeft = getDaysUntil(subscription.billingDay, subscription.startDate);
-  const status = getStatus(daysLeft, subscription.isTrial || false);
-  const statusText = getStatusText(daysLeft, t);
+  const overdueDays = getOverdueDays(subscription.billingDay);
+  const status = getPaymentStatus(subscription);
+  const statusText = getStatusText(status, daysLeft, overdueDays, t);
 
   const handleTouchStart = () => {
-    isLongPress.current = false;
+    isLongPressRef.current = false;
     longPressTimer.current = window.setTimeout(() => {
-      isLongPress.current = true;
+      isLongPressRef.current = true;
       hapticFeedback.warning();
       onLongPress();
     }, 500);
@@ -52,7 +76,7 @@ export function SubscriptionGridCard({ subscription, onTap, onLongPress }: Subsc
   };
 
   const handleClick = () => {
-    if (!isLongPress.current) {
+    if (!isLongPressRef.current) {
       hapticFeedback.light();
       onTap();
     }
@@ -83,3 +107,6 @@ export function SubscriptionGridCard({ subscription, onTap, onLongPress }: Subsc
     </div>
   );
 }
+
+// Export helper for App.tsx to determine if payment sheet should open
+export { getPaymentStatus };

@@ -28,7 +28,11 @@
     "billingIn": "Через {{count}} дн.",
     "billingIn_one": "Через {{count}} день",
     "billingIn_few": "Через {{count}} дня",
-    "billingIn_many": "Через {{count}} дней"
+    "billingIn_many": "Через {{count}} дней",
+    "overdue": "Просрочено на {{count}} дн.",
+    "overdue_one": "Просрочено на {{count}} день",
+    "overdue_few": "Просрочено на {{count}} дня",
+    "overdue_many": "Просрочено на {{count}} дней"
   },
   "form": {
     "add": "Добавить подписку",
@@ -91,5 +95,19 @@
   },
   "grid": {
     "title": "Ваши подписки"
+  },
+  "payment": {
+    "title": "Требует оплаты",
+    "overdue": "Просрочено на {{count}} дн.",
+    "overdue_one": "Просрочено на {{count}} день",
+    "overdue_few": "Просрочено на {{count}} дня",
+    "overdue_many": "Просрочено на {{count}} дней",
+    "dueToday": "Оплата сегодня",
+    "whenPaid": "Когда вы оплатили?",
+    "paidToday": "Оплатил сегодня",
+    "selectDate": "Выбрать дату оплаты",
+    "cancelled": "Отменил подписку",
+    "back": "Назад",
+    "confirm": "Подтвердить"
   }
 }

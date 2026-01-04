@@ -19,6 +19,30 @@
   border-color: #FF3B30;
 }
 
+/* Overdue - red border with pulse animation */
+.card.overdue {
+  border-color: #FF3B30;
+}
+
+.card.overdue .iconWrapper {
+  box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.15);
+  animation: overduePulse 2s ease-in-out infinite;
+}
+
+@keyframes overduePulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.15); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 59, 48, 0.08); }
+}
+
+/* Due today - red border without animation */
+.card.dueToday {
+  border-color: #FF3B30;
+}
+
+.card.dueToday .iconWrapper {
+  box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.15);
+}
+
 /* Trial - special background + FREE badge */
 .card.trial {
   background: linear-gradient(135deg,
