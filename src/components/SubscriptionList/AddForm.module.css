@@ -266,19 +266,59 @@
 }
 
 .emojiSectionOpen {
-  max-height: 160px;
+  max-height: 220px;
   opacity: 1;
   margin-top: 8px;
+}
+
+/* Category tabs */
+.categoryTabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+  background: var(--app-bg-color);
+  border-radius: 12px 12px 0 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.categoryTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.categoryTab {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.categoryTab:active {
+  transform: scale(0.9);
+}
+
+.categoryTabActive {
+  background: var(--app-button-color);
 }
 
 /* Сетка эмодзи */
 .emojiGrid {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: 4px;
   padding: 10px;
   background: var(--app-bg-color);
-  border-radius: 12px;
+  border-radius: 0 0 12px 12px;
   max-height: 140px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;

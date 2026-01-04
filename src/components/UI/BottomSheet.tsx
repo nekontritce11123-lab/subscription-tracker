@@ -11,6 +11,7 @@ interface BottomSheetProps {
 
 export function BottomSheet({ isOpen, onClose, children, title }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
   const currentY = useRef(0);
   const isDragging = useRef(false);
@@ -100,14 +101,19 @@ export function BottomSheet({ isOpen, onClose, children, title }: BottomSheetPro
         ref={sheetRef}
         className={sheetClasses}
         onClick={(e) => e.stopPropagation()}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={(e) => {
-          e.stopPropagation();
-          handleTouchEnd();
-        }}
       >
-        <div className={styles.handle} />
+        <div
+          ref={handleRef}
+          className={styles.handleArea}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+            handleTouchEnd();
+          }}
+        >
+          <div className={styles.handle} />
+        </div>
         {title && <h2 className={styles.title}>{title}</h2>}
         <div className={styles.content}>
           {children}

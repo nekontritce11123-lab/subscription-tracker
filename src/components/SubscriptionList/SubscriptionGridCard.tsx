@@ -89,7 +89,7 @@ export function SubscriptionGridCard({ subscription, isHighlighted, onTap, onLon
   const statusText = getStatusText(status, daysLeft, overdueDays, t);
   const totalSpent = calculateTotalSpent(subscription);
 
-  const handleTouchStart = () => {
+  const handlePressStart = () => {
     isLongPressRef.current = false;
     longPressTimer.current = window.setTimeout(() => {
       isLongPressRef.current = true;
@@ -98,7 +98,7 @@ export function SubscriptionGridCard({ subscription, isHighlighted, onTap, onLon
     }, 500);
   };
 
-  const handleTouchEnd = () => {
+  const handlePressEnd = () => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
@@ -110,6 +110,13 @@ export function SubscriptionGridCard({ subscription, isHighlighted, onTap, onLon
       hapticFeedback.light();
       onTap();
     }
+  };
+
+  // Context menu for right-click on PC
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    hapticFeedback.warning();
+    onLongPress();
   };
 
   const cardClasses = [
@@ -125,9 +132,13 @@ export function SubscriptionGridCard({ subscription, isHighlighted, onTap, onLon
     <div
       className={cardClasses}
       onClick={handleClick}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchEnd}
+      onTouchStart={handlePressStart}
+      onTouchEnd={handlePressEnd}
+      onTouchCancel={handlePressEnd}
+      onMouseDown={handlePressStart}
+      onMouseUp={handlePressEnd}
+      onMouseLeave={handlePressEnd}
+      onContextMenu={handleContextMenu}
     >
       {status === 'trial' && <span className={styles.freeBadge}>FREE</span>}
 

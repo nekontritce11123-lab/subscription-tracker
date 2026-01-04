@@ -65,12 +65,23 @@
   }
 }
 
+.handleArea {
+  width: 100%;
+  padding: var(--spacing-sm) 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.handleArea:active {
+  cursor: grabbing;
+}
+
 .handle {
   width: 36px;
   height: 4px;
   background: rgba(var(--app-hint-color-rgb), 0.3);
   border-radius: 2px;
-  margin: 0 auto var(--spacing-md);
+  margin: 0 auto;
 }
 
 .title {
