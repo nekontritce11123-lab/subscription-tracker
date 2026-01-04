@@ -73,10 +73,6 @@ export function useTelegram() {
     if (tg) {
       tg.ready();
       tg.expand();
-
-      // Apply Telegram theme colors to CSS variables
-      applyThemeColors(tg.themeParams);
-
       setWebApp(tg);
       setIsReady(true);
     } else {
@@ -84,34 +80,6 @@ export function useTelegram() {
       setIsReady(true);
     }
   }, []);
-
-  // Apply Telegram theme params to CSS custom properties
-  function applyThemeColors(themeParams: TelegramWebApp['themeParams']) {
-    const root = document.documentElement;
-
-    if (themeParams.bg_color) {
-      root.style.setProperty('--tg-theme-bg-color', themeParams.bg_color);
-    }
-    if (themeParams.text_color) {
-      root.style.setProperty('--tg-theme-text-color', themeParams.text_color);
-    }
-    if (themeParams.hint_color) {
-      root.style.setProperty('--tg-theme-hint-color', themeParams.hint_color);
-    }
-    if (themeParams.link_color) {
-      root.style.setProperty('--tg-theme-link-color', themeParams.link_color);
-      root.style.setProperty('--tg-theme-accent-text-color', themeParams.link_color);
-    }
-    if (themeParams.button_color) {
-      root.style.setProperty('--tg-theme-button-color', themeParams.button_color);
-    }
-    if (themeParams.button_text_color) {
-      root.style.setProperty('--tg-theme-button-text-color', themeParams.button_text_color);
-    }
-    if (themeParams.secondary_bg_color) {
-      root.style.setProperty('--tg-theme-secondary-bg-color', themeParams.secondary_bg_color);
-    }
-  }
 
   const hapticFeedback = {
     light: () => webApp?.HapticFeedback.impactOccurred('light'),
@@ -132,7 +100,8 @@ export function useTelegram() {
   const colorScheme = webApp?.colorScheme || 'light';
 
   const getInitData = (): string => {
-    return webApp?.initData || '';
+    // Read directly from window to get initData before useEffect runs
+    return window.Telegram?.WebApp?.initData || '';
   };
 
   const getStartParam = (): string | undefined => {
