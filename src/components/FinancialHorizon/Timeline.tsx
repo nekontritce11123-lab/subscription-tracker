@@ -17,6 +17,12 @@ export interface TimelineRef {
 export const Timeline = forwardRef<TimelineRef, TimelineProps>(
   ({ events, today, selectedId, onSubscriptionTap }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
+    const trackRef = useRef<HTMLDivElement>(null);
+    const minScrollRef = useRef(0);
+    const pullOffsetRef = useRef(0);
+    const isTouchingRef = useRef(false);
+    const startTouchXRef = useRef(0);
+    const startScrollLeftRef = useRef(0);
 
     const scrollToToday = () => {
       if (!containerRef.current) return;
@@ -42,12 +48,84 @@ export const Timeline = forwardRef<TimelineRef, TimelineProps>(
       scrollToToday,
     }));
 
+    // Min scroll = 0 (allow the small left padding to be visible)
+    useEffect(() => {
+      minScrollRef.current = 0;
+    }, []);
+
     // Auto-center on today on mount
     useEffect(() => {
-      // Small delay to ensure DOM is ready
       const timer = setTimeout(scrollToToday, 50);
       return () => clearTimeout(timer);
     }, [today]);
+
+    // Rubber band effect when pulling past day 1
+    useEffect(() => {
+      const container = containerRef.current;
+      const track = trackRef.current;
+      if (!container || !track) return;
+
+      const applyPullOffset = (offset: number) => {
+        pullOffsetRef.current = offset;
+        track.style.transform = offset > 0 ? `translateX(${offset}px)` : '';
+      };
+
+      const handleTouchStart = (e: TouchEvent) => {
+        isTouchingRef.current = true;
+        startTouchXRef.current = e.touches[0].clientX;
+        startScrollLeftRef.current = container.scrollLeft;
+        track.style.transition = 'none';
+      };
+
+      const handleTouchMove = (e: TouchEvent) => {
+        if (!isTouchingRef.current) return;
+
+        const currentX = e.touches[0].clientX;
+        const deltaX = currentX - startTouchXRef.current;
+        const minScroll = minScrollRef.current;
+
+        // Calculate where scroll would be
+        const targetScroll = startScrollLeftRef.current - deltaX;
+
+        if (targetScroll < minScroll) {
+          // We're trying to scroll past day 1
+          e.preventDefault();
+
+          // Keep scroll at minimum
+          container.scrollLeft = minScroll;
+
+          // Calculate overscroll amount with resistance
+          const overscroll = minScroll - targetScroll;
+          const dampedOffset = Math.sqrt(overscroll) * 3; // Square root for natural resistance
+          applyPullOffset(dampedOffset);
+        } else {
+          // Normal scrolling, reset any pull offset
+          if (pullOffsetRef.current > 0) {
+            applyPullOffset(0);
+          }
+        }
+      };
+
+      const handleTouchEnd = () => {
+        isTouchingRef.current = false;
+
+        if (pullOffsetRef.current > 0) {
+          // Animate back
+          track.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          applyPullOffset(0);
+        }
+      };
+
+      container.addEventListener('touchstart', handleTouchStart, { passive: true });
+      container.addEventListener('touchmove', handleTouchMove, { passive: false });
+      container.addEventListener('touchend', handleTouchEnd);
+
+      return () => {
+        container.removeEventListener('touchstart', handleTouchStart);
+        container.removeEventListener('touchmove', handleTouchMove);
+        container.removeEventListener('touchend', handleTouchEnd);
+      };
+    }, []);
 
     // Check if any subscription in event matches selectedId
     const isEventSelected = (event: TimelineEvent) => {
@@ -56,7 +134,7 @@ export const Timeline = forwardRef<TimelineRef, TimelineProps>(
 
     return (
       <div className={styles.timeline} ref={containerRef}>
-        <div className={styles.timelineTrack}>
+        <div className={styles.timelineTrack} ref={trackRef}>
           {events.map((event) => (
             <TimelineCard
               key={event.day}

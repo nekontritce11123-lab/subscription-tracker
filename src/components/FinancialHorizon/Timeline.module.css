@@ -5,6 +5,7 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   padding: var(--spacing-md) 0 var(--spacing-lg);
+  overscroll-behavior-x: none;
 }
 
 .timeline::-webkit-scrollbar {
@@ -14,7 +15,7 @@
 .timelineTrack {
   display: flex;
   gap: var(--spacing-xs);
-  /* Padding allows today to center on mount */
-  padding: 0 calc(50% - 26px);
+  /* Left: small visual padding, Right: allows today to center */
+  padding: 0 calc(50% - 26px) 0 var(--spacing-md);
   position: relative;
 }
