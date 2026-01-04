@@ -1,0 +1,87 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  background: var(--tg-theme-secondary-bg-color);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+  border: 2px solid transparent;
+}
+
+/* Urgent - red border */
+.card.urgent {
+  border-color: #FF3B30;
+}
+
+/* Trial - special background + FREE badge */
+.card.trial {
+  background: linear-gradient(135deg,
+    rgba(52, 199, 89, 0.08) 0%,
+    var(--tg-theme-secondary-bg-color) 100%
+  );
+}
+
+/* FREE badge */
+.freeBadge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+  color: #fff;
+  background: #34C759;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.card:active {
+  transform: scale(0.97);
+}
+
+/* Icon wrapper */
+.iconWrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  font-size: 26px;
+}
+
+/* Name */
+.name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--tg-theme-text-color);
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Status */
+.status {
+  font-size: var(--font-size-xs);
+  color: var(--tg-theme-hint-color);
+  text-align: center;
+}
+
+/* Price */
+.price {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--tg-theme-text-color);
+}

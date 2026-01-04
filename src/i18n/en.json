@@ -53,6 +53,27 @@
     "cta": "Add subscription"
   },
   "currency": "P",
+  "timeline": {
+    "today": "Today",
+    "total": "Total",
+    "daysToSurvive": "{{count}} days to survive",
+    "daysToSurvive_one": "{{count}} day to survive",
+    "daysToSurvive_other": "{{count}} days to survive",
+    "tomorrow": "Tomorrow",
+    "inDays": "in {{count}} days",
+    "inDays_one": "in {{count}} day",
+    "inDays_other": "in {{count}} days",
+    "paid": "paid",
+    "noUpcoming": "No upcoming payments",
+    "subscriptions": "{{count}} subscriptions",
+    "subscriptions_one": "{{count}} subscription",
+    "subscriptions_other": "{{count}} subscriptions",
+    "next": "Next: {{name}}, {{days}}d",
+    "paidOf": "paid: {{amount}} P",
+    "daysLeft": "{{count}} days left",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left"
+  },
   "confirm": {
     "delete": "Delete subscription?",
     "deleteDesc": "This action cannot be undone",
@@ -60,5 +81,8 @@
     "no": "Cancel",
     "deleted": "{{name}} deleted",
     "undo": "Undo"
+  },
+  "grid": {
+    "title": "Your subscriptions"
   }
 }

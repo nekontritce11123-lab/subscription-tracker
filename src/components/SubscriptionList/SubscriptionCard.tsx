@@ -126,7 +126,14 @@ export function SubscriptionCard({
     if (isDragging.current) return;
 
     hapticFeedback.light();
-    onStartEdit();
+
+    if (isEditing) {
+      // Повторный клик — закрыть редактирование
+      onCancelEdit();
+    } else {
+      // Первый клик — открыть редактирование
+      onStartEdit();
+    }
   };
 
   const wrapperClasses = [
@@ -193,7 +200,6 @@ export function SubscriptionCard({
           <InlineEditForm
             subscription={subscription}
             onSave={onEdit}
-            onCancel={onCancelEdit}
           />
         )}
       </div>
@@ -205,10 +211,9 @@ export function SubscriptionCard({
 interface InlineEditFormProps {
   subscription: Subscription;
   onSave: (data: Omit<Subscription, 'id' | 'createdAt'>) => void;
-  onCancel: () => void;
 }
 
-function InlineEditForm({ subscription, onSave, onCancel }: InlineEditFormProps) {
+function InlineEditForm({ subscription, onSave }: InlineEditFormProps) {
   const { t } = useTranslation();
   const { hapticFeedback } = useTelegram();
 
@@ -327,10 +332,7 @@ function InlineEditForm({ subscription, onSave, onCancel }: InlineEditFormProps)
       </div>
 
       <div className={formStyles.actions}>
-        <Button type="button" variant="ghost" onClick={onCancel}>
-          {t('form.cancel')}
-        </Button>
-        <Button type="submit" disabled={!isValid}>
+        <Button type="submit" disabled={!isValid} fullWidth>
           {t('form.update')}
         </Button>
       </div>

@@ -56,6 +56,31 @@
     "cta": "Добавить подписку"
   },
   "currency": "P",
+  "timeline": {
+    "today": "Сегодня",
+    "total": "Итого",
+    "daysToSurvive": "осталось пережить: {{count}} дней",
+    "daysToSurvive_one": "осталось пережить: {{count}} день",
+    "daysToSurvive_few": "осталось пережить: {{count}} дня",
+    "daysToSurvive_many": "осталось пережить: {{count}} дней",
+    "tomorrow": "Завтра",
+    "inDays": "через {{count}} дн.",
+    "inDays_one": "через {{count}} день",
+    "inDays_few": "через {{count}} дня",
+    "inDays_many": "через {{count}} дней",
+    "paid": "оплачено",
+    "noUpcoming": "Нет предстоящих списаний",
+    "subscriptions": "{{count}} подписок",
+    "subscriptions_one": "{{count}} подписка",
+    "subscriptions_few": "{{count}} подписки",
+    "subscriptions_many": "{{count}} подписок",
+    "next": "След: {{name}}, {{days}} дн",
+    "paidOf": "оплачено: {{amount}} P",
+    "daysLeft": "осталось: {{count}} дн",
+    "daysLeft_one": "осталось: {{count}} день",
+    "daysLeft_few": "осталось: {{count}} дня",
+    "daysLeft_many": "осталось: {{count}} дней"
+  },
   "confirm": {
     "delete": "Удалить подписку?",
     "deleteDesc": "Это действие нельзя отменить",
@@ -63,5 +88,8 @@
     "no": "Отмена",
     "deleted": "{{name}} удалена",
     "undo": "Отменить"
+  },
+  "grid": {
+    "title": "Ваши подписки"
   }
 }

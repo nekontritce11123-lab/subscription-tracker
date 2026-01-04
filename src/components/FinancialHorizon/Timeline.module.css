@@ -1,0 +1,20 @@
+.timeline {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: var(--spacing-md) 0 var(--spacing-lg);
+}
+
+.timeline::-webkit-scrollbar {
+  display: none;
+}
+
+.timelineTrack {
+  display: flex;
+  gap: var(--spacing-xs);
+  /* Padding allows today to center on mount */
+  padding: 0 calc(50% - 26px);
+  position: relative;
+}

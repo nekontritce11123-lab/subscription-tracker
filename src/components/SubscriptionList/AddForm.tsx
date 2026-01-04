@@ -38,7 +38,7 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
 
   const [name, setName] = useState(editingSubscription?.name || '');
   const [amount, setAmount] = useState(editingSubscription?.amount?.toString() || '');
-  const [billingDay, setBillingDay] = useState(editingSubscription?.billingDay?.toString() || '');
+  const [billingDay, setBillingDay] = useState(editingSubscription?.billingDay?.toString() || new Date().getDate().toString());
   const [isTrial, setIsTrial] = useState(editingSubscription?.isTrial || false);
   const [startDate, setStartDate] = useState(getTodayString());
 
@@ -98,6 +98,14 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
     setIsTrial(!isTrial);
   };
 
+  // Sync billing day when start date changes
+  const handleStartDateChange = (newDate: string) => {
+    setStartDate(newDate);
+    // Auto-update billing day from selected date
+    const date = new Date(newDate);
+    setBillingDay(date.getDate().toString());
+  };
+
   const isValid = useMemo(() => {
     const amountNum = parseInt(amount, 10);
     const dayNum = parseInt(billingDay, 10);
@@ -139,7 +147,7 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
           <span className={styles.dateLabel}>{t('form.startDate')}</span>
           <DatePicker
             value={startDate}
-            onChange={setStartDate}
+            onChange={handleStartDateChange}
             maxDate={new Date()}
           />
         </div>

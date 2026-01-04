@@ -4,3 +4,4 @@ export { Badge } from './Badge';
 export { IconBadge } from './IconBadge';
 export { DatePicker } from './DatePicker';
 export { Toast } from './Toast';
+export { BottomSheet } from './BottomSheet';

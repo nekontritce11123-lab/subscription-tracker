@@ -1,0 +1,35 @@
+.container {
+  padding: 0 var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.monthSelector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.month {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--tg-theme-text-color);
+}
+
+.chevron {
+  font-size: var(--font-size-sm);
+  color: var(--tg-theme-hint-color);
+  transform: translateY(-2px);
+}
+
+.total {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--tg-theme-text-color);
+}
