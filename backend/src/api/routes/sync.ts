@@ -14,6 +14,8 @@ router.post('/', async (req, res: Response) => {
     const { telegramUser } = req as AuthenticatedRequest;
     const { subscriptions } = req.body;
 
+    console.log(`[Sync] User ${telegramUser.id} (${telegramUser.first_name}) syncing ${subscriptions?.length || 0} subscriptions`);
+
     if (!Array.isArray(subscriptions)) {
       res.status(400).json({ error: 'subscriptions must be an array' });
       return;
