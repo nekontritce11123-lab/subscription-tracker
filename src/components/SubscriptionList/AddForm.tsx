@@ -16,6 +16,22 @@ const COLORS = [
   '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
 ];
 
+const PERIOD_OPTIONS = [
+  { value: 1, label: '1 мес' },
+  { value: 2, label: '2 мес' },
+  { value: 3, label: '3 мес' },
+  { value: 6, label: '6 мес' },
+  { value: 12, label: '1 год' },
+];
+
+const POPULAR_EMOJI = [
+  '🎬', '🎵', '🎮', '☁️', '📱', '💪', '📚', '🍿',
+  '🎧', '📺', '🛒', '🚗', '🏠', '💼', '🎨', '🔒',
+  '💰', '🎯', '🚀', '⭐', '🔥', '💎', '🎁', '🌈',
+  '🍕', '☕', '🍺', '🎲', '🎪', '🎭', '🎤', '📸',
+  '✈️', '🏋️', '🧘', '🎾', '⚽', '🏀', '🎱', '🎳',
+];
+
 function getColorFromName(name: string): string {
   if (!name) return '#8E8E93';
   return COLORS[name.charCodeAt(0) % COLORS.length];
@@ -39,8 +55,13 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
   const [name, setName] = useState(editingSubscription?.name || '');
   const [amount, setAmount] = useState(editingSubscription?.amount?.toString() || '');
   const [billingDay, setBillingDay] = useState(editingSubscription?.billingDay?.toString() || new Date().getDate().toString());
+  const [periodMonths, setPeriodMonths] = useState(editingSubscription?.periodMonths || 1);
   const [isTrial, setIsTrial] = useState(editingSubscription?.isTrial || false);
   const [startDate, setStartDate] = useState(getTodayString());
+  const [emoji, setEmoji] = useState(editingSubscription?.emoji || '');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isEmojiClosing, setIsEmojiClosing] = useState(false);
+  const [showPeriodPicker, setShowPeriodPicker] = useState(false);
 
   const autoIcon = useMemo(() => editingSubscription?.icon || getIconFromName(name), [name, editingSubscription?.icon]);
   const autoColor = useMemo(() => editingSubscription?.color || getColorFromName(name), [name, editingSubscription?.color]);
@@ -74,14 +95,15 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
 
     onAdd({
       name: name.trim(),
-      icon: autoIcon,
+      icon: emoji || autoIcon,
       color: autoColor,
       amount: amountNum,
       currency: 'RUB',
-      period: 'month',
+      periodMonths,
       billingDay: dayNum,
       startDate: new Date(startDate).toISOString(),
       isTrial,
+      emoji: emoji || undefined,
     });
   };
 
@@ -106,6 +128,15 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
     setBillingDay(date.getDate().toString());
   };
 
+  // Закрытие emoji picker с анимацией
+  const closeEmojiPicker = () => {
+    setIsEmojiClosing(true);
+    setTimeout(() => {
+      setShowEmojiPicker(false);
+      setIsEmojiClosing(false);
+    }, 150);
+  };
+
   const isValid = useMemo(() => {
     const amountNum = parseInt(amount, 10);
     const dayNum = parseInt(billingDay, 10);
@@ -115,16 +146,66 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.fields}>
-        <Input
-          ref={nameInputRef}
-          label={t('form.name')}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={t('form.namePlaceholder')}
-          autoComplete="off"
-        />
+        {/* Название с иконкой слева */}
+        <div className={styles.nameRow}>
+          <div
+            className={styles.iconButton}
+            style={{ backgroundColor: autoColor }}
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          >
+            {emoji || autoIcon}
+          </div>
+          <Input
+            ref={nameInputRef}
+            label={t('form.name')}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t('form.namePlaceholder')}
+            autoComplete="off"
+          />
+        </div>
 
-        <div className={styles.row}>
+        {/* Emoji picker - overlay поверх других элементов */}
+        {showEmojiPicker && (
+          <>
+            <div
+              className={`${styles.emojiBackdrop} ${isEmojiClosing ? styles.closing : ''}`}
+              onClick={closeEmojiPicker}
+            />
+            <div className={`${styles.emojiPickerOverlay} ${isEmojiClosing ? styles.closing : ''}`}>
+              <div className={styles.emojiPicker}>
+                <button
+                  type="button"
+                  className={`${styles.emojiItem} ${!emoji ? styles.emojiItemActive : ''}`}
+                  onClick={() => {
+                    hapticFeedback.light();
+                    setEmoji('');
+                    closeEmojiPicker();
+                  }}
+                >
+                  {autoIcon}
+                </button>
+                {POPULAR_EMOJI.map((e) => (
+                  <button
+                    key={e}
+                    type="button"
+                    className={`${styles.emojiItem} ${emoji === e ? styles.emojiItemActive : ''}`}
+                    onClick={() => {
+                      hapticFeedback.light();
+                      setEmoji(e);
+                      closeEmojiPicker();
+                    }}
+                  >
+                    {e}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Сумма, Период, День */}
+        <div className={styles.rowThree}>
           <Input
             label={t('form.amount')}
             value={amount}
@@ -133,14 +214,46 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
             inputMode="numeric"
             suffix={t('currency')}
           />
+          <div className={styles.periodWrapper}>
+            <span className={styles.periodLabel}>Период</span>
+            <div
+              className={styles.periodButton}
+              onClick={() => {
+                hapticFeedback.light();
+                setShowPeriodPicker(!showPeriodPicker);
+              }}
+            >
+              {PERIOD_OPTIONS.find(o => o.value === periodMonths)?.label}
+            </div>
+          </div>
           <Input
-            label={t('form.day')}
+            label="День списания"
             value={billingDay}
             onChange={(e) => handleDayChange(e.target.value)}
             placeholder="1-31"
             inputMode="numeric"
           />
         </div>
+
+        {/* Period picker popup */}
+        {showPeriodPicker && (
+          <div className={styles.periodPicker}>
+            {PERIOD_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`${styles.periodOption} ${periodMonths === option.value ? styles.periodOptionActive : ''}`}
+                onClick={() => {
+                  hapticFeedback.light();
+                  setPeriodMonths(option.value);
+                  setShowPeriodPicker(false);
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Секция выбора даты первой оплаты */}
         <div className={styles.dateSection}>

@@ -16,6 +16,28 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* Monthly total card */
+.monthlyTotalCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: var(--app-secondary-bg-color);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.monthlyTotalLabel {
+  font-size: var(--font-size-sm);
+  color: var(--app-hint-color);
+}
+
+.monthlyTotalValue {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--app-text-color);
+}
+
 /* Section header */
 .sectionHeader {
   margin-bottom: var(--spacing-md);

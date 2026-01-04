@@ -66,6 +66,13 @@ const cloudStorage = {
 
 // Миграция старых данных к новому формату
 function migrateSubscription(sub: Record<string, unknown>): Subscription {
+  // Конвертация старого period в periodMonths
+  let periodMonths = sub.periodMonths as number | undefined;
+  if (!periodMonths) {
+    const oldPeriod = sub.period as Period | undefined;
+    periodMonths = oldPeriod === 'year' ? 12 : 1;
+  }
+
   return {
     id: sub.id as string,
     name: sub.name as string,
@@ -73,10 +80,11 @@ function migrateSubscription(sub: Record<string, unknown>): Subscription {
     color: (sub.color as string) || '#007AFF',
     amount: sub.amount as number,
     currency: (sub.currency as Currency) || 'RUB',
-    period: (sub.period as Period) || 'month',
+    periodMonths,
     billingDay: sub.billingDay as number,
     startDate: (sub.startDate as string) || (sub.createdAt as string) || new Date().toISOString(),
     isTrial: (sub.isTrial as boolean) || false,
+    emoji: sub.emoji as string | undefined,
     createdAt: (sub.createdAt as string) || new Date().toISOString(),
   };
 }

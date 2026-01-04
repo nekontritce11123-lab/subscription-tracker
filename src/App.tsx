@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FinancialHorizon } from './components/FinancialHorizon';
 import { SubscriptionGridCard, EmptyState, AddForm, getPaymentStatus } from './components/SubscriptionList';
@@ -8,6 +8,15 @@ import { useSubscriptions, useTelegram, setApiInitData } from './hooks';
 import { getOverdueDays, isDueToday as checkIsDueToday } from './hooks/useStats';
 import { Subscription } from './types/subscription';
 import styles from './App.module.css';
+
+// Рассчитать общую сумму подписок в месяц
+function calculateMonthlyTotal(subscriptions: Subscription[]): number {
+  return subscriptions.reduce((total, sub) => {
+    if (sub.isTrial) return total;
+    const periodMonths = sub.periodMonths || 1;
+    return total + (sub.amount / periodMonths);
+  }, 0);
+}
 
 interface DeletedItem {
   subscription: Subscription;
@@ -34,6 +43,9 @@ function App() {
   const [deletedItem, setDeletedItem] = useState<DeletedItem | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<Subscription | null>(null);
   const [deepLinkId, setDeepLinkId] = useState<string | null>(null);
+
+  // Общая сумма подписок в месяц
+  const monthlyTotal = useMemo(() => calculateMonthlyTotal(subscriptions), [subscriptions]);
 
   // Handle deep link from notification (?subscription=<id>)
   useEffect(() => {
@@ -169,6 +181,14 @@ function App() {
           <EmptyState onAdd={handleOpenAddSheet} />
         ) : (
           <>
+            {/* Общая сумма в месяц */}
+            <div className={styles.monthlyTotalCard}>
+              <span className={styles.monthlyTotalLabel}>Всего в месяц</span>
+              <span className={styles.monthlyTotalValue}>
+                {Math.round(monthlyTotal).toLocaleString('ru-RU')} {t('currency')}
+              </span>
+            </div>
+
             <div className={styles.sectionHeader}>
               <span className={styles.sectionTitle}>{t('grid.title')}</span>
             </div>

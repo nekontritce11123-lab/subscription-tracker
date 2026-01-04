@@ -1,5 +1,5 @@
 export type Currency = 'RUB' | 'USD' | 'EUR';
-export type Period = 'month' | 'year';
+export type Period = 'month' | 'year';  // Legacy, kept for migration
 
 export interface Subscription {
   id: string;
@@ -8,10 +8,12 @@ export interface Subscription {
   color: string;
   amount: number;
   currency: Currency;
-  period: Period;
+  period?: Period;          // Legacy field, kept for migration
+  periodMonths: number;     // Периодичность в месяцах (1, 2, 3, 6, 12)
   billingDay: number;
-  startDate: string;      // Обязательное - дата первой оплаты
-  isTrial?: boolean;      // Пробный период
+  startDate: string;        // Дата первой оплаты
+  isTrial?: boolean;        // Пробный период
+  emoji?: string;           // Эмодзи вместо первой буквы
   createdAt: string;
 }
 

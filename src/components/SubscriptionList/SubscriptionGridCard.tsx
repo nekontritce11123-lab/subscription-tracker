@@ -48,6 +48,27 @@ function getStatusText(
   return t('card.billingIn', { count: daysLeft });
 }
 
+// Рассчитать сумму потраченного с момента первой оплаты
+function calculateTotalSpent(subscription: Subscription): number {
+  const { startDate, amount, periodMonths = 1, isTrial } = subscription;
+
+  if (isTrial) return 0;
+
+  const start = new Date(startDate);
+  const now = new Date();
+
+  // Если дата старта в будущем — ещё ничего не потрачено
+  if (start > now) return 0;
+
+  // Считаем количество месяцев с момента старта
+  const monthsDiff = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+
+  // Количество платежей = месяцы / периодичность + 1 (первый платёж)
+  const payments = Math.floor(monthsDiff / periodMonths) + 1;
+
+  return payments * amount;
+}
+
 export function SubscriptionGridCard({ subscription, onTap, onLongPress }: SubscriptionGridCardProps) {
   const { t } = useTranslation();
   const { hapticFeedback } = useTelegram();
@@ -58,6 +79,7 @@ export function SubscriptionGridCard({ subscription, onTap, onLongPress }: Subsc
   const overdueDays = getOverdueDays(subscription.billingDay);
   const status = getPaymentStatus(subscription);
   const statusText = getStatusText(status, daysLeft, overdueDays, t);
+  const totalSpent = calculateTotalSpent(subscription);
 
   const handleTouchStart = () => {
     isLongPressRef.current = false;
@@ -87,6 +109,9 @@ export function SubscriptionGridCard({ subscription, onTap, onLongPress }: Subsc
     styles[status],
   ].filter(Boolean).join(' ');
 
+  // Используем emoji если есть, иначе icon
+  const displayIcon = subscription.emoji || subscription.icon;
+
   return (
     <div
       className={cardClasses}
@@ -97,13 +122,18 @@ export function SubscriptionGridCard({ subscription, onTap, onLongPress }: Subsc
     >
       {status === 'trial' && <span className={styles.freeBadge}>FREE</span>}
       <div className={styles.iconWrapper} style={{ backgroundColor: subscription.color }}>
-        <span className={styles.icon}>{subscription.icon}</span>
+        <span className={styles.icon}>{displayIcon}</span>
       </div>
       <span className={styles.name}>{subscription.name}</span>
       <span className={styles.status}>{statusText}</span>
       <span className={styles.price}>
         {subscription.amount.toLocaleString('ru-RU')} {t('currency')}
       </span>
+      {totalSpent > 0 && (
+        <span className={styles.totalSpent}>
+          Потрачено: {totalSpent.toLocaleString('ru-RU')} {t('currency')}
+        </span>
+      )}
     </div>
   );
 }

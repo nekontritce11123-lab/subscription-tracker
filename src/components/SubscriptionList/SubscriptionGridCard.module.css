@@ -109,3 +109,12 @@
   font-weight: var(--font-weight-bold);
   color: var(--app-text-color);
 }
+
+/* Total spent */
+.totalSpent {
+  font-size: 10px;
+  color: var(--app-hint-color);
+  text-align: center;
+  margin-top: 2px;
+  opacity: 0.8;
+}
