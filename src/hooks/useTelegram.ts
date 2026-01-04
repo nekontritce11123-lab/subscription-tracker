@@ -12,6 +12,7 @@ interface TelegramWebApp {
   ready: () => void;
   expand: () => void;
   close: () => void;
+  initData: string;
   initDataUnsafe: {
     user?: {
       id: number;
@@ -20,6 +21,7 @@ interface TelegramWebApp {
       username?: string;
       language_code?: string;
     };
+    start_param?: string;
   };
   themeParams: {
     bg_color?: string;
@@ -97,6 +99,14 @@ export function useTelegram() {
 
   const colorScheme = webApp?.colorScheme || 'light';
 
+  const getInitData = (): string => {
+    return webApp?.initData || '';
+  };
+
+  const getStartParam = (): string | undefined => {
+    return webApp?.initDataUnsafe.start_param;
+  };
+
   return {
     webApp,
     isReady,
@@ -104,5 +114,7 @@ export function useTelegram() {
     colorScheme,
     hapticFeedback,
     getUserLanguage,
+    getInitData,
+    getStartParam,
   };
 }

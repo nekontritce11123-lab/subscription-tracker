@@ -1,3 +1,17 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+dist-ssr
+backend/dist
+
+# Environment files
+.env
+.env.local
+.env.*.local
+backend/.env
+
 # Logs
 logs
 *.log
@@ -6,11 +20,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +31,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Database (keep structure, ignore data)
+backend/data/db.json
+
+# Claude Code
+.claude/settings.local.json

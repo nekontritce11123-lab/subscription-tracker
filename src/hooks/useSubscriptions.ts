@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Subscription, Currency, Period } from '../types/subscription';
+import { apiClient } from '../api/client';
 
 const STORAGE_KEY = 'subscription_tracker_data';
 
@@ -21,7 +22,6 @@ function migrateSubscription(sub: Record<string, unknown>): Subscription {
 }
 
 function generateId(): string {
-  // Use crypto.randomUUID if available, fallback to custom generator
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
@@ -53,12 +53,10 @@ function loadFromStorage(): Subscription[] {
       return [];
     }
 
-    // Validate, migrate and filter out invalid entries
     const migrated = parsed
       .filter(validateSubscription)
       .map((sub: unknown) => migrateSubscription(sub as Record<string, unknown>));
 
-    // Сохраняем мигрированные данные обратно
     if (migrated.length > 0) {
       saveToStorage(migrated);
     }
@@ -87,14 +85,11 @@ function getDaysUntilPayment(billingDay: number): number {
   let targetDate: Date;
 
   if (billingDay >= currentDay) {
-    // Payment is later this month
     targetDate = new Date(currentYear, currentMonth, billingDay);
   } else {
-    // Payment is next month
     targetDate = new Date(currentYear, currentMonth + 1, billingDay);
   }
 
-  // Handle months with fewer days
   const lastDayOfTargetMonth = new Date(
     targetDate.getFullYear(),
     targetDate.getMonth() + 1,
@@ -112,33 +107,66 @@ function getDaysUntilPayment(billingDay: number): number {
 export function useSubscriptions() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [useApi, setUseApi] = useState(false);
 
-  // Load from storage on mount
+  // Initialize: try API first, fallback to localStorage
   useEffect(() => {
-    const saved = loadFromStorage();
-    setSubscriptions(saved);
-    setIsLoaded(true);
+    async function init() {
+      try {
+        const { subscriptions: apiSubs } = await apiClient.init();
+        setSubscriptions(apiSubs);
+        setUseApi(true);
+        // Sync localStorage as backup
+        saveToStorage(apiSubs);
+      } catch {
+        // Fallback to localStorage
+        console.log('[Subscriptions] API unavailable, using localStorage');
+        const saved = loadFromStorage();
+        setSubscriptions(saved);
+        setUseApi(false);
+      }
+      setIsLoaded(true);
+    }
+
+    init();
   }, []);
 
-  // Use functional updates to prevent race conditions
-  const addSubscription = useCallback((data: Omit<Subscription, 'id' | 'createdAt'>) => {
-    const newSubscription: Subscription = {
+  const addSubscription = useCallback(async (data: Omit<Subscription, 'id' | 'createdAt'>) => {
+    // Optimistic update
+    const tempSubscription: Subscription = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
     };
 
     setSubscriptions((prev) => {
-      const updated = [...prev, newSubscription];
-      // Save immediately with the new state
+      const updated = [...prev, tempSubscription];
       saveToStorage(updated);
       return updated;
     });
 
-    return newSubscription;
-  }, []);
+    if (useApi) {
+      try {
+        const apiSubscription = await apiClient.createSubscription(data);
+        // Replace temp with real API response
+        setSubscriptions((prev) => {
+          const updated = prev.map((sub) =>
+            sub.id === tempSubscription.id ? apiSubscription : sub
+          );
+          saveToStorage(updated);
+          return updated;
+        });
+        return apiSubscription;
+      } catch (error) {
+        console.error('[Subscriptions] API create failed:', error);
+      }
+    }
 
-  const updateSubscription = useCallback((id: string, data: Partial<Subscription>) => {
+    return tempSubscription;
+  }, [useApi]);
+
+  const updateSubscription = useCallback(async (id: string, data: Partial<Subscription>) => {
+    // Optimistic update
     setSubscriptions((prev) => {
       const updated = prev.map((sub) =>
         sub.id === id ? { ...sub, ...data } : sub
@@ -146,26 +174,69 @@ export function useSubscriptions() {
       saveToStorage(updated);
       return updated;
     });
-  }, []);
 
-  const removeSubscription = useCallback((id: string) => {
+    if (useApi) {
+      try {
+        await apiClient.updateSubscription(id, data);
+      } catch (error) {
+        console.error('[Subscriptions] API update failed:', error);
+      }
+    }
+  }, [useApi]);
+
+  const removeSubscription = useCallback(async (id: string) => {
+    // Optimistic update
     setSubscriptions((prev) => {
       const updated = prev.filter((sub) => sub.id !== id);
       saveToStorage(updated);
       return updated;
     });
-  }, []);
+
+    if (useApi) {
+      try {
+        await apiClient.deleteSubscription(id);
+      } catch (error) {
+        console.error('[Subscriptions] API delete failed:', error);
+      }
+    }
+  }, [useApi]);
 
   const restoreSubscription = useCallback((subscription: Subscription, index: number) => {
     setSubscriptions((prev) => {
       const updated = [...prev];
-      // Insert at original position or end if index is out of bounds
       const insertIndex = Math.min(index, updated.length);
       updated.splice(insertIndex, 0, subscription);
       saveToStorage(updated);
       return updated;
     });
-  }, []);
+
+    // Re-create on API if available
+    if (useApi) {
+      const { id, createdAt, ...data } = subscription;
+      apiClient.createSubscription(data).catch(console.error);
+    }
+  }, [useApi]);
+
+  const markAsPaid = useCallback(async (id: string, paidDate?: string) => {
+    const date = paidDate || new Date().toISOString().split('T')[0];
+
+    // Optimistic update
+    setSubscriptions((prev) => {
+      const updated = prev.map((sub) =>
+        sub.id === id ? { ...sub, startDate: date, isTrial: false } : sub
+      );
+      saveToStorage(updated);
+      return updated;
+    });
+
+    if (useApi) {
+      try {
+        await apiClient.markAsPaid(id, paidDate);
+      } catch (error) {
+        console.error('[Subscriptions] API mark paid failed:', error);
+      }
+    }
+  }, [useApi]);
 
   const getSubscription = useCallback(
     (id: string) => subscriptions.find((sub) => sub.id === id),
@@ -184,10 +255,12 @@ export function useSubscriptions() {
   return {
     subscriptions: sortedSubscriptions,
     isLoaded,
+    isApiConnected: useApi,
     addSubscription,
     updateSubscription,
     removeSubscription,
     restoreSubscription,
+    markAsPaid,
     getSubscription,
   };
 }

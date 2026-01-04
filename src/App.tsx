@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FinancialHorizon } from './components/FinancialHorizon';
 import { SubscriptionGridCard, EmptyState, AddForm, getPaymentStatus } from './components/SubscriptionList';
@@ -7,6 +7,7 @@ import { Button, Toast, BottomSheet } from './components/UI';
 import { useSubscriptions, useTelegram } from './hooks';
 import { getOverdueDays, isDueToday as checkIsDueToday } from './hooks/useStats';
 import { Subscription } from './types/subscription';
+import { apiClient } from './api/client';
 import styles from './App.module.css';
 
 interface DeletedItem {
@@ -16,9 +17,17 @@ interface DeletedItem {
 
 function App() {
   const { t } = useTranslation();
-  const { isReady, hapticFeedback } = useTelegram();
-  const { subscriptions, isLoaded, addSubscription, updateSubscription, removeSubscription, restoreSubscription } =
+  const { isReady, hapticFeedback, getInitData } = useTelegram();
+  const { subscriptions, isLoaded, addSubscription, updateSubscription, removeSubscription, restoreSubscription, getSubscription } =
     useSubscriptions();
+
+  // Initialize API client with Telegram initData
+  useEffect(() => {
+    const initData = getInitData();
+    if (initData) {
+      apiClient.setInitData(initData);
+    }
+  }, [getInitData]);
 
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [addFormKey, setAddFormKey] = useState(0);
@@ -26,6 +35,29 @@ function App() {
   const [paymentSubscription, setPaymentSubscription] = useState<Subscription | null>(null);
   const [deletedItem, setDeletedItem] = useState<DeletedItem | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<Subscription | null>(null);
+  const [deepLinkId, setDeepLinkId] = useState<string | null>(null);
+
+  // Handle deep link from notification (?subscription=<id>)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const subscriptionId = params.get('subscription');
+    if (subscriptionId) {
+      setDeepLinkId(subscriptionId);
+      // Clear URL params to prevent reopening on refresh
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  // Open payment sheet when deep link subscription is loaded
+  useEffect(() => {
+    if (deepLinkId && isLoaded && subscriptions.length > 0) {
+      const subscription = getSubscription(deepLinkId);
+      if (subscription) {
+        setPaymentSubscription(subscription);
+        setDeepLinkId(null);
+      }
+    }
+  }, [deepLinkId, isLoaded, subscriptions, getSubscription]);
 
   const handleAddNew = (data: Omit<Subscription, 'id' | 'createdAt'>) => {
     addSubscription(data);
