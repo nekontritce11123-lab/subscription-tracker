@@ -50,7 +50,7 @@ function getStatusText(
 
 // Рассчитать сумму потраченного с момента первой оплаты
 function calculateTotalSpent(subscription: Subscription): number {
-  const { startDate, amount, periodMonths = 1, isTrial } = subscription;
+  const { startDate, amount, periodMonths = 1, isTrial, billingDay } = subscription;
 
   if (isTrial) return 0;
 
@@ -63,8 +63,15 @@ function calculateTotalSpent(subscription: Subscription): number {
   // Считаем количество месяцев с момента старта
   const monthsDiff = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
 
-  // Количество платежей = месяцы / периодичность + 1 (первый платёж)
-  const payments = Math.floor(monthsDiff / periodMonths) + 1;
+  // Проверяем, прошёл ли уже день оплаты в текущем месяце
+  const effectiveBillingDay = billingDay || start.getDate();
+  const billingDayPassed = now.getDate() >= effectiveBillingDay;
+
+  // Количество полных периодов
+  const fullPeriods = Math.floor(monthsDiff / periodMonths);
+
+  // Добавляем текущий период только если день оплаты уже прошёл
+  const payments = billingDayPassed ? fullPeriods + 1 : Math.max(1, fullPeriods);
 
   return payments * amount;
 }

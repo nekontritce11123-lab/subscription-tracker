@@ -32,8 +32,14 @@ function calculateStats(subscriptions: Subscription[], monthlyTotal: number): St
     if (start > now) continue;
 
     const monthsDiff = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-    const payments = Math.floor(monthsDiff / periodMonths) + 1;
 
+    // Если день оплаты ещё не наступил в текущем месяце — не считать текущий период
+    const billingDay = sub.billingDay || start.getDate();
+    const billingDayPassed = now.getDate() >= billingDay;
+    const fullPeriods = Math.floor(monthsDiff / periodMonths);
+    const payments = billingDayPassed ? fullPeriods + 1 : Math.max(1, fullPeriods);
+
+    console.log(`[Stats] ${sub.name}: monthsDiff=${monthsDiff}, billingDay=${billingDay}, today=${now.getDate()}, billingDayPassed=${billingDayPassed}, fullPeriods=${fullPeriods}, payments=${payments}`);
     totalSpent += payments * amount;
 
     if (monthsDiff > oldestMonths) {
