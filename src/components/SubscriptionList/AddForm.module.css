@@ -51,7 +51,7 @@
 /* Три колонки: сумма, период, день */
 .rowThree {
   display: grid;
-  grid-template-columns: 175px 60px 1fr;
+  grid-template-columns: minmax(80px, 1fr) 55px 110px;
   gap: 6px;
   align-items: stretch;
 }
@@ -61,6 +61,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .currencySymbol {
