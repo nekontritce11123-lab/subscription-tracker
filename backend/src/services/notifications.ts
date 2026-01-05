@@ -2,7 +2,7 @@ import { Subscription, OverdueSubscription } from '../types.js';
 
 /**
  * Calculate days until next billing
- * Returns 0 if due today, negative if overdue
+ * Takes into account startDate and billingDay logic
  */
 export function getDaysUntilBilling(subscription: Subscription): number {
   const today = new Date();
@@ -11,17 +11,37 @@ export function getDaysUntilBilling(subscription: Subscription): number {
   const startDate = new Date(subscription.startDate);
   startDate.setHours(0, 0, 0, 0);
 
-  // Find next billing date based on periodMonths
-  const nextBilling = new Date(startDate);
+  const { billingDay, periodMonths } = subscription;
+  const startDay = startDate.getDate();
 
-  // Keep adding periodMonths until we're past today
-  while (nextBilling <= today) {
-    nextBilling.setMonth(nextBilling.getMonth() + subscription.periodMonths);
+  // Handle months with fewer days
+  const adjustDate = (d: Date, targetDay: number): Date => {
+    const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    return new Date(d.getFullYear(), d.getMonth(), Math.min(targetDay, lastDay));
+  };
+
+  // Determine the first billing date based on creation logic
+  let firstBilling: Date;
+
+  if (billingDay <= startDay) {
+    // billingDay passed or is today when created → paid
+    // First unpaid billing is next period
+    firstBilling = new Date(startDate.getFullYear(), startDate.getMonth() + periodMonths, billingDay);
+  } else {
+    // billingDay in future when created → not paid yet
+    firstBilling = new Date(startDate.getFullYear(), startDate.getMonth(), billingDay);
+  }
+  firstBilling = adjustDate(firstBilling, billingDay);
+
+  // Find the next billing date from today
+  let nextBilling = new Date(firstBilling);
+  while (nextBilling < today) {
+    nextBilling.setMonth(nextBilling.getMonth() + periodMonths);
+    nextBilling = adjustDate(nextBilling, billingDay);
   }
 
-  // Calculate difference in days
   const diffTime = nextBilling.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
   return diffDays;
 }
@@ -38,6 +58,12 @@ export function getDueTomorrowSubscriptions(subscriptions: Subscription[]): Subs
 
 /**
  * Get overdue and due-today subscriptions for notifications
+ *
+ * Logic:
+ * - startDate is when user created/last paid the subscription
+ * - billingDay is the day of month when payment is due
+ * - At creation: if billingDay <= startDate.day → paid, if billingDay > startDate.day → not paid yet
+ * - After that: if billingDay passed and user didn't mark as paid → overdue
  */
 export function getOverdueSubscriptions(subscriptions: Subscription[]): OverdueSubscription[] {
   const result: OverdueSubscription[] = [];
@@ -45,41 +71,66 @@ export function getOverdueSubscriptions(subscriptions: Subscription[]): OverdueS
   for (const subscription of subscriptions) {
     if (subscription.isTrial) continue;
 
-    const daysUntil = getDaysUntilBilling(subscription);
-
-    // Due today (daysUntil === 0) - but with our logic daysUntil is always >= 1 after billing
-    // So we need to check if billing was yesterday or earlier
-    // Actually, let's recalculate: check if next billing is today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const startDate = new Date(subscription.startDate);
     startDate.setHours(0, 0, 0, 0);
 
-    // Find the billing date we should have paid
-    const checkDate = new Date(startDate);
-    while (checkDate < today) {
-      checkDate.setMonth(checkDate.getMonth() + subscription.periodMonths);
+    const { billingDay, periodMonths } = subscription;
+    const startDay = startDate.getDate();
+
+    // Handle months with fewer days
+    const adjustDate = (d: Date, targetDay: number): Date => {
+      const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      return new Date(d.getFullYear(), d.getMonth(), Math.min(targetDay, lastDay));
+    };
+
+    // Determine the first billing date that needs to be paid
+    // If billingDay <= startDay at creation → considered paid, first billing is next period
+    // If billingDay > startDay at creation → first billing is this month (not paid yet)
+    let firstBilling: Date;
+
+    if (billingDay <= startDay) {
+      // billingDay already passed or is today when created → paid
+      // First unpaid billing is next period
+      firstBilling = new Date(startDate.getFullYear(), startDate.getMonth() + periodMonths, billingDay);
+    } else {
+      // billingDay is in the future when created → not paid yet
+      // First unpaid billing is this month
+      firstBilling = new Date(startDate.getFullYear(), startDate.getMonth(), billingDay);
+    }
+    firstBilling = adjustDate(firstBilling, billingDay);
+
+    // Find the most recent billing date that should have been paid (up to today)
+    let lastDueBilling: Date | null = null;
+    let checkDate = new Date(firstBilling);
+
+    while (checkDate <= today) {
+      lastDueBilling = new Date(checkDate);
+      checkDate.setMonth(checkDate.getMonth() + periodMonths);
+      checkDate = adjustDate(checkDate, billingDay);
     }
 
-    // checkDate is now the next billing date (today or future)
-    const diffTime = checkDate.getTime() - today.getTime();
-    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    // If there's a billing date that should have been paid
+    if (lastDueBilling) {
+      const overdueDays = Math.round((today.getTime() - lastDueBilling.getTime()) / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) {
-      // Due today
-      result.push({
-        subscription,
-        overdueDays: 0,
-        isDueToday: true,
-      });
-    } else if (diffDays < 0) {
-      // Overdue (shouldn't happen with while loop, but safety check)
-      result.push({
-        subscription,
-        overdueDays: Math.abs(diffDays),
-        isDueToday: false,
-      });
+      if (overdueDays === 0) {
+        // Due today
+        result.push({
+          subscription,
+          overdueDays: 0,
+          isDueToday: true,
+        });
+      } else if (overdueDays > 0) {
+        // Overdue
+        result.push({
+          subscription,
+          overdueDays,
+          isDueToday: false,
+        });
+      }
     }
   }
 
