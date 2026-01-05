@@ -91,12 +91,9 @@ export function useTelegram() {
 
   const hapticFeedback = {
     light: () => webApp?.HapticFeedback.impactOccurred('light'),
-    medium: () => webApp?.HapticFeedback.impactOccurred('medium'),
-    heavy: () => webApp?.HapticFeedback.impactOccurred('heavy'),
     success: () => webApp?.HapticFeedback.notificationOccurred('success'),
     error: () => webApp?.HapticFeedback.notificationOccurred('error'),
     warning: () => webApp?.HapticFeedback.notificationOccurred('warning'),
-    selection: () => webApp?.HapticFeedback.selectionChanged(),
   };
 
   const getUserLanguage = (): 'ru' | 'en' => {
@@ -112,10 +109,6 @@ export function useTelegram() {
     return window.Telegram?.WebApp?.initData || '';
   };
 
-  const getStartParam = (): string | undefined => {
-    return webApp?.initDataUnsafe.start_param;
-  };
-
   return {
     webApp,
     isReady,
@@ -124,6 +117,5 @@ export function useTelegram() {
     hapticFeedback,
     getUserLanguage,
     getInitData,
-    getStartParam,
   };
 }

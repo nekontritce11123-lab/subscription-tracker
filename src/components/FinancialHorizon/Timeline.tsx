@@ -71,6 +71,7 @@ export const Timeline = forwardRef<TimelineRef, TimelineProps>(
       };
 
       const handleTouchStart = (e: TouchEvent) => {
+        if (!e.touches[0]) return;
         isTouchingRef.current = true;
         startTouchXRef.current = e.touches[0].clientX;
         startScrollLeftRef.current = container.scrollLeft;
@@ -78,7 +79,7 @@ export const Timeline = forwardRef<TimelineRef, TimelineProps>(
       };
 
       const handleTouchMove = (e: TouchEvent) => {
-        if (!isTouchingRef.current) return;
+        if (!isTouchingRef.current || !e.touches[0]) return;
 
         const currentX = e.touches[0].clientX;
         const deltaX = currentX - startTouchXRef.current;

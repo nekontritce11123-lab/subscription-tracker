@@ -69,8 +69,9 @@ function calculateTotalSpent(subscription: Subscription): number {
   const effectiveBillingDay = billingDay || start.getDate();
   const billingDayPassed = now.getDate() >= effectiveBillingDay;
 
-  // Количество полных периодов
-  const fullPeriods = Math.floor(monthsDiff / periodMonths);
+  // Количество полных периодов (защита от деления на 0)
+  const safePeriod = periodMonths || 1;
+  const fullPeriods = Math.floor(monthsDiff / safePeriod);
 
   // Добавляем текущий период только если день оплаты уже прошёл
   const payments = billingDayPassed ? fullPeriods + 1 : Math.max(1, fullPeriods);

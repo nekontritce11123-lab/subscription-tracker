@@ -41,7 +41,9 @@ const loadSelectedCurrencies = (): Currency[] => {
 
 // Save selected currencies to localStorage
 const saveSelectedCurrencies = (currencies: Currency[]) => {
-  localStorage.setItem('selectedCurrencies', JSON.stringify(currencies));
+  try {
+    localStorage.setItem('selectedCurrencies', JSON.stringify(currencies));
+  } catch {}
 };
 
 export function TopBar({ subscriptions }: TopBarProps) {

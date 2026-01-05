@@ -83,12 +83,6 @@ function calculateMonthsSince(startDateStr: string): number {
   return Math.max(1, months + 1);
 }
 
-export function getUrgencyLevel(daysLeft: number): 'urgent' | 'warning' | 'normal' {
-  if (daysLeft <= 2) return 'urgent';
-  if (daysLeft <= 7) return 'warning';
-  return 'normal';
-}
-
 /**
  * Check if a subscription payment is overdue
  * Overdue means: billing day has passed this month AND we haven't paid yet this month
@@ -129,15 +123,6 @@ export function isDueToday(billingDay: number, startDate: string): boolean {
 export function getOverdueDays(billingDay: number): number {
   const today = new Date().getDate();
   return Math.max(0, today - billingDay);
-}
-
-export function formatDaysLeft(
-  daysLeft: number,
-  t: (key: string, options?: Record<string, unknown>) => string
-): string {
-  if (daysLeft === 0) return t('card.today');
-  if (daysLeft === 1) return t('card.tomorrow');
-  return t('card.daysLeft', { count: daysLeft });
 }
 
 export function calculateTotalPaid(
@@ -199,21 +184,6 @@ export function useStats(subscriptions: Subscription[]): Stats {
 }
 
 /**
- * Calculate the number of months since a start date
- */
-function calculateMonthsSinceStart(startDateStr: string): number {
-  const startDate = new Date(startDateStr);
-  const now = new Date();
-  let months =
-    (now.getFullYear() - startDate.getFullYear()) * 12 +
-    (now.getMonth() - startDate.getMonth());
-  if (now.getDate() < startDate.getDate()) {
-    months -= 1;
-  }
-  return Math.max(1, months + 1);
-}
-
-/**
  * Hook to get stats grouped by currency
  */
 export function useStatsByCurrency(subscriptions: Subscription[]): StatsByCurrency {
@@ -238,7 +208,7 @@ export function useStatsByCurrency(subscriptions: Subscription[]): StatsByCurren
 
       const totalSpent = subs.reduce((sum, sub) => {
         if (sub.startDate && !sub.isTrial) {
-          const months = calculateMonthsSinceStart(sub.startDate);
+          const months = calculateMonthsSince(sub.startDate);
           const periodMonths = sub.periodMonths || 1;
           const payments = Math.floor(months / periodMonths);
           return sum + sub.amount * Math.max(1, payments);

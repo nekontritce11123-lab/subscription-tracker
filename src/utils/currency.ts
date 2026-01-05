@@ -21,19 +21,3 @@ export const DEFAULT_CURRENCY: Currency = 'RUB';
 export const getCurrencySymbol = (currency: Currency): string => {
   return CURRENCIES[currency]?.symbol || '₽';
 };
-
-export const getCurrencyName = (currency: Currency): string => {
-  return CURRENCIES[currency]?.name || 'Рубль';
-};
-
-export const formatAmount = (amount: number, currency: Currency): string => {
-  const symbol = getCurrencySymbol(currency);
-  const formatted = amount.toLocaleString('ru-RU');
-  return `${formatted} ${symbol}`;
-};
-
-export const formatAmountShort = (amount: number, currency: Currency): string => {
-  const symbol = getCurrencySymbol(currency);
-  const formatted = amount.toLocaleString('ru-RU');
-  return `${symbol} ${formatted}`;
-};
