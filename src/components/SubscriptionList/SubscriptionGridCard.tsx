@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Subscription } from '../../types/subscription';
 import { getDaysUntil, isOverdue, isDueToday, getOverdueDays } from '../../hooks/useStats';
+import { getCurrencySymbol } from '../../utils/currency';
 import { useTelegram } from '../../hooks/useTelegram';
 import styles from './SubscriptionGridCard.module.css';
 
@@ -153,11 +154,11 @@ export function SubscriptionGridCard({ subscription, isHighlighted, onTap, onLon
       {/* Центр: цена + потрачено */}
       <div className={styles.priceBlock}>
         <span className={styles.price}>
-          {subscription.amount.toLocaleString('ru-RU')} {t('currency')}
+          {subscription.amount.toLocaleString('ru-RU')} {getCurrencySymbol(subscription.currency || 'RUB')}
         </span>
         {totalSpent > 0 && (
           <span className={styles.totalSpent}>
-            ~{totalSpent.toLocaleString('ru-RU')} {t('currency')}
+            ~{totalSpent.toLocaleString('ru-RU')} {getCurrencySymbol(subscription.currency || 'RUB')}
           </span>
         )}
       </div>

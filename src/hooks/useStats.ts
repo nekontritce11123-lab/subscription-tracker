@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Subscription, Stats } from '../types/subscription';
+import { Subscription, Stats, Currency, StatsByCurrency } from '../types/subscription';
 
 /**
  * Calculate days until the next billing date
@@ -195,5 +195,66 @@ export function useStats(subscriptions: Subscription[]): Stats {
       subscriptionCount: subscriptions.length,
       nextPayment,
     };
+  }, [subscriptions]);
+}
+
+/**
+ * Calculate the number of months since a start date
+ */
+function calculateMonthsSinceStart(startDateStr: string): number {
+  const startDate = new Date(startDateStr);
+  const now = new Date();
+  let months =
+    (now.getFullYear() - startDate.getFullYear()) * 12 +
+    (now.getMonth() - startDate.getMonth());
+  if (now.getDate() < startDate.getDate()) {
+    months -= 1;
+  }
+  return Math.max(1, months + 1);
+}
+
+/**
+ * Hook to get stats grouped by currency
+ */
+export function useStatsByCurrency(subscriptions: Subscription[]): StatsByCurrency {
+  return useMemo(() => {
+    const result: StatsByCurrency = {};
+
+    // Group subscriptions by currency
+    const byCurrency = new Map<Currency, Subscription[]>();
+    for (const sub of subscriptions) {
+      const currency = sub.currency || 'RUB';
+      const list = byCurrency.get(currency) || [];
+      list.push(sub);
+      byCurrency.set(currency, list);
+    }
+
+    // Calculate stats for each currency
+    for (const [currency, subs] of byCurrency) {
+      const monthlyTotal = subs.reduce((sum, sub) => {
+        const periodMonths = sub.periodMonths || 1;
+        return sum + (sub.isTrial ? 0 : sub.amount / periodMonths);
+      }, 0);
+
+      const totalSpent = subs.reduce((sum, sub) => {
+        if (sub.startDate && !sub.isTrial) {
+          const months = calculateMonthsSinceStart(sub.startDate);
+          const periodMonths = sub.periodMonths || 1;
+          const payments = Math.floor(months / periodMonths);
+          return sum + sub.amount * Math.max(1, payments);
+        }
+        return sum;
+      }, 0);
+
+      result[currency] = {
+        monthlyTotal,
+        totalSpent,
+        subscriptionCount: subs.length,
+        yearlyProjection: monthlyTotal * 12,
+        avgPerDay: monthlyTotal / 30,
+      };
+    }
+
+    return result;
   }, [subscriptions]);
 }

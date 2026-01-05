@@ -63,6 +63,7 @@ export function useTimelineData(subscriptions: Subscription[]): MonthData {
         icon: sub.icon,
         color: sub.color,
         amount: sub.amount,
+        currency: sub.currency,
         isTrial: sub.isTrial ?? false,
         isPaid: isPast,
         daysUntil,

@@ -91,6 +91,13 @@
   "grid": {
     "title": "Your subscriptions"
   },
+  "stats": {
+    "totalSpent": "Total spent",
+    "yearly": "Yearly",
+    "perDay": "Per day",
+    "monthly": "Monthly",
+    "otherCurrencies": "Other currencies"
+  },
   "payment": {
     "title": "Payment required",
     "overdue": "{{count}} days overdue",

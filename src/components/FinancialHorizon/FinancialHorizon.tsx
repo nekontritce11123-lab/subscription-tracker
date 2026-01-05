@@ -17,7 +17,7 @@ export function FinancialHorizon({ subscriptions, selectedDay, onDaySelect }: Fi
 
   return (
     <header className={styles.header}>
-      <TopBar data={monthData} subscriptions={subscriptions} />
+      <TopBar subscriptions={subscriptions} />
 
       <Timeline
         ref={timelineRef}

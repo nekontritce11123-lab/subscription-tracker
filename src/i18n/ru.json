@@ -103,7 +103,8 @@
     "totalSpent": "Потрачено",
     "yearly": "В год",
     "perDay": "В день",
-    "monthly": "В месяц"
+    "monthly": "В месяц",
+    "otherCurrencies": "Другие валюты"
   },
   "payment": {
     "title": "Требует оплаты",

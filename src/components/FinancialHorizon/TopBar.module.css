@@ -32,9 +32,8 @@
 
 /* Total button */
 .totalButton {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--app-text-color);
+  display: flex;
+  align-items: center;
   background: none;
   border: none;
   padding: 4px 8px;
@@ -49,6 +48,7 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+
 /* Stats popup - bubble style */
 .statsPopup {
   position: absolute;
@@ -56,8 +56,8 @@
   right: var(--spacing-lg);
   background: var(--app-secondary-bg-color);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
-  min-width: 170px;
+  padding: 10px 12px;
+  min-width: 180px;
   z-index: 101;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   animation: popupSlideIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -80,35 +80,65 @@
   border-radius: 2px;
 }
 
+/* Currency block - clickable */
+.currencyBlock {
+  padding: 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  border: 2px solid transparent;
+}
+
+.currencyBlock:active {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.currencyBlockSelected {
+  border-color: var(--app-button-color);
+  background-color: rgba(var(--app-button-color-rgb, 88, 166, 255), 0.1);
+}
+
+.currencyBlockDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .statsRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: 2px 0;
+  gap: 12px;
 }
 
 .statsLabel {
-  font-size: var(--font-size-xs);
+  font-size: 11px;
   color: var(--app-hint-color);
 }
 
-.statsValue {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+.statsValuePrimary {
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
   color: var(--app-text-color);
 }
 
-.statsValuePrimary {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--app-text-color);
+/* Compact row with multiple stats */
+.statsRowCompact {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 4px;
+}
+
+.statsRowCompact span {
+  font-size: 11px;
+  color: var(--app-hint-color);
 }
 
 .statsDivider {
   height: 1px;
   background: rgba(255, 255, 255, 0.08);
-  margin: var(--spacing-xs) 0;
+  margin: 8px 0;
 }
 
 /* Animations */
@@ -132,4 +162,30 @@
     opacity: 0;
     transform: scale(0.85) translateY(-4px);
   }
+}
+
+/* Total button content */
+.totalAmount {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--app-text-color);
+}
+
+.totalSymbol {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--app-hint-color);
+  margin-left: 4px;
+}
+
+/* Currency items in header */
+.currencyItem {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.currencySep {
+  color: var(--app-hint-color);
+  margin: 0 6px;
+  font-weight: var(--font-weight-normal);
 }

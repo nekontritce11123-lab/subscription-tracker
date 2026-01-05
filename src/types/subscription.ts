@@ -1,4 +1,4 @@
-export type Currency = 'RUB' | 'USD' | 'EUR';
+export type Currency = 'RUB' | 'USD' | 'EUR' | 'UAH' | 'BYN';
 export type Period = 'month' | 'year';  // Legacy, kept for migration
 
 export interface Subscription {
@@ -28,6 +28,17 @@ export interface Stats {
   };
 }
 
+// Статистика по валютам
+export interface CurrencyStats {
+  monthlyTotal: number;
+  totalSpent: number;
+  subscriptionCount: number;
+  yearlyProjection: number;
+  avgPerDay: number;
+}
+
+export type StatsByCurrency = Partial<Record<Currency, CurrencyStats>>;
+
 // Timeline types
 export interface TimelineSubscription {
   id: string;
@@ -35,6 +46,7 @@ export interface TimelineSubscription {
   icon: string;
   color: string;
   amount: number;
+  currency: Currency;
   isTrial: boolean;
   isPaid: boolean;
   daysUntil: number;

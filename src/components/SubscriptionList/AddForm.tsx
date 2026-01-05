@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Subscription } from '../../types/subscription';
+import { Subscription, Currency } from '../../types/subscription';
 import { Button, Input, DatePicker } from '../UI';
 import { useTelegram } from '../../hooks/useTelegram';
+import { CURRENCY_LIST, DEFAULT_CURRENCY, getCurrencySymbol } from '../../utils/currency';
 import styles from './AddForm.module.css';
 
 interface AddFormProps {
@@ -23,9 +24,6 @@ const PERIOD_OPTIONS = [
   { value: 6, label: '6 мес' },
   { value: 12, label: '1 год' },
 ];
-
-const DEFAULT_CURRENCY = 'RUB';
-
 
 // Эмодзи для подписок по категориям
 const EMOJI_CATEGORIES = [
@@ -150,7 +148,9 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
   const [emoji, setEmoji] = useState(editingSubscription?.emoji || '');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showPeriodPicker, setShowPeriodPicker] = useState(false);
+  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(0);
+  const [currency, setCurrency] = useState<Currency>(editingSubscription?.currency || DEFAULT_CURRENCY);
 
   const autoIcon = useMemo(() => editingSubscription?.icon || getIconFromName(name), [name, editingSubscription?.icon]);
   const autoColor = useMemo(() => editingSubscription?.color || getColorFromName(name), [name, editingSubscription?.color]);
@@ -187,7 +187,7 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
       icon: emoji || autoIcon,
       color: autoColor,
       amount: amountNum,
-      currency: DEFAULT_CURRENCY,
+      currency,
       periodMonths,
       billingDay: dayNum,
       startDate: new Date(startDate).toISOString(),
@@ -321,8 +321,19 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
               onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
               placeholder="0"
               inputMode="numeric"
+              suffix={
+                <span
+                  className={styles.currencySuffix}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    hapticFeedback.light();
+                    setShowCurrencyPicker(!showCurrencyPicker);
+                  }}
+                >
+                  {getCurrencySymbol(currency)}
+                </span>
+              }
             />
-            <span className={styles.currencySymbol}>₽</span>
           </div>
           <div className={styles.periodWrapper}>
             <span className={styles.periodLabel}>Период</span>
@@ -369,6 +380,26 @@ export function AddForm({ onAdd, onCancel, editingSubscription }: AddFormProps) 
                 }}
               >
                 {option.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Currency picker popup */}
+        {showCurrencyPicker && (
+          <div className={styles.currencyPicker}>
+            {CURRENCY_LIST.map((cur) => (
+              <button
+                key={cur.code}
+                type="button"
+                className={`${styles.currencyOption} ${currency === cur.code ? styles.currencyOptionActive : ''}`}
+                onClick={() => {
+                  hapticFeedback.light();
+                  setCurrency(cur.code);
+                  setShowCurrencyPicker(false);
+                }}
+              >
+                {cur.symbol}
               </button>
             ))}
           </div>

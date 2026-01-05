@@ -1,69 +1,100 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MonthData, Subscription } from '../../types/subscription';
+import { Subscription, Currency } from '../../types/subscription';
 import { useTelegram } from '../../hooks/useTelegram';
+import { useStatsByCurrency } from '../../hooks/useStats';
+import { getCurrencySymbol } from '../../utils/currency';
 import styles from './TopBar.module.css';
 
 interface TopBarProps {
-  data: MonthData;
   subscriptions: Subscription[];
 }
 
-interface Stats {
-  totalSpent: number;
-  yearlyProjection: number;
-  avgPerDay: number;
-  subscriptionCount: number;
-  oldestSubscriptionMonths: number;
-}
+// Order of currencies for display
+const CURRENCY_ORDER: Currency[] = ['RUB', 'USD', 'EUR', 'UAH', 'BYN'];
+const MAX_DISPLAYED_CURRENCIES = 3;
 
-function calculateStats(subscriptions: Subscription[], monthlyTotal: number): Stats {
-  let totalSpent = 0;
-  let oldestMonths = 0;
-
-  const now = new Date();
-
-  for (const sub of subscriptions) {
-    const { startDate, amount, periodMonths = 1, isTrial } = sub;
-
-    if (isTrial) continue;
-
-    const start = new Date(startDate);
-    if (start > now) continue;
-
-    const monthsDiff = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-
-    // Если день оплаты ещё не наступил в текущем месяце — не считать текущий период
-    const billingDay = sub.billingDay || start.getDate();
-    const billingDayPassed = now.getDate() >= billingDay;
-    const fullPeriods = Math.floor(monthsDiff / periodMonths);
-    const payments = billingDayPassed ? fullPeriods + 1 : Math.max(1, fullPeriods);
-
-    console.log(`[Stats] ${sub.name}: monthsDiff=${monthsDiff}, billingDay=${billingDay}, today=${now.getDate()}, billingDayPassed=${billingDayPassed}, fullPeriods=${fullPeriods}, payments=${payments}`);
-    totalSpent += payments * amount;
-
-    if (monthsDiff > oldestMonths) {
-      oldestMonths = monthsDiff;
-    }
+// Format number with K/M suffixes for compact display
+const formatCompact = (num: number): string => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'м';
   }
+  if (num >= 10000) {
+    return (num / 1000).toFixed(0) + 'к';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'к';
+  }
+  return Math.round(num).toLocaleString('ru-RU');
+};
 
-  return {
-    totalSpent,
-    yearlyProjection: Math.round(monthlyTotal * 12),
-    avgPerDay: Math.round(monthlyTotal / 30),
-    subscriptionCount: subscriptions.length,
-    oldestSubscriptionMonths: oldestMonths,
-  };
-}
+// Load selected currencies from localStorage
+const loadSelectedCurrencies = (): Currency[] => {
+  try {
+    const saved = localStorage.getItem('selectedCurrencies');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch {}
+  return [];
+};
 
-export function TopBar({ data, subscriptions }: TopBarProps) {
+// Save selected currencies to localStorage
+const saveSelectedCurrencies = (currencies: Currency[]) => {
+  localStorage.setItem('selectedCurrencies', JSON.stringify(currencies));
+};
+
+export function TopBar({ subscriptions }: TopBarProps) {
   const { t } = useTranslation();
   const { hapticFeedback } = useTelegram();
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [selectedCurrencies, setSelectedCurrencies] = useState<Currency[]>(loadSelectedCurrencies);
 
-  const monthlyTotal = Math.round(data.totalAmount);
-  const stats = useMemo(() => calculateStats(subscriptions, monthlyTotal), [subscriptions, monthlyTotal]);
+  const statsByCurrency = useStatsByCurrency(subscriptions);
+
+  // Get currencies that have subscriptions, in order
+  const activeCurrencies = CURRENCY_ORDER.filter(c => statsByCurrency[c]);
+
+  // Filter selected currencies to only those that are active (have subscriptions)
+  const displayedCurrencies = selectedCurrencies.filter(c => activeCurrencies.includes(c));
+
+  // If no currencies selected yet, auto-select first available (up to 2)
+  useEffect(() => {
+    if (displayedCurrencies.length === 0 && activeCurrencies.length > 0) {
+      const initial = activeCurrencies.slice(0, MAX_DISPLAYED_CURRENCIES);
+      setSelectedCurrencies(initial);
+      saveSelectedCurrencies(initial);
+    }
+  }, [activeCurrencies, displayedCurrencies.length]);
+
+  const toggleCurrency = (currency: Currency) => {
+    setSelectedCurrencies(prev => {
+      if (prev.includes(currency)) {
+        // Can't remove if it's the last one
+        if (prev.length <= 1) {
+          return prev;
+        }
+        // Remove currency
+        hapticFeedback.light();
+        const newSelected = prev.filter(c => c !== currency);
+        saveSelectedCurrencies(newSelected);
+        return newSelected;
+      } else {
+        // Add currency (max 2)
+        if (prev.length >= MAX_DISPLAYED_CURRENCIES) {
+          // Already at max - can't add more
+          hapticFeedback.error();
+          return prev;
+        }
+        hapticFeedback.light();
+        const newSelected = [...prev, currency];
+        saveSelectedCurrencies(newSelected);
+        return newSelected;
+      }
+    });
+  };
+
 
   const closePopup = useCallback(() => {
     if (isVisible && !isClosing) {
@@ -84,20 +115,17 @@ export function TopBar({ data, subscriptions }: TopBarProps) {
     }
   };
 
-  // Close popup when clicking anywhere
   useEffect(() => {
     if (!isVisible) return;
 
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      // Don't close if clicking on the popup itself or the button
       if (target.closest(`.${styles.statsPopup}`) || target.closest(`.${styles.totalButton}`)) {
         return;
       }
       closePopup();
     };
 
-    // Small delay to prevent immediate close on open
     const timer = setTimeout(() => {
       document.addEventListener('click', handleClickOutside);
     }, 10);
@@ -116,45 +144,60 @@ export function TopBar({ data, subscriptions }: TopBarProps) {
         <span className={styles.productName}>Tracker</span>
       </div>
       <button className={styles.totalButton} onClick={handleTotalClick}>
-        {monthlyTotal.toLocaleString('ru-RU')} {t('currency')}
+        {displayedCurrencies.length > 0 ? (
+          displayedCurrencies.map((currency, index) => {
+            const stats = statsByCurrency[currency];
+            if (!stats) return null;
+            return (
+              <span key={currency} className={styles.currencyItem}>
+                {index > 0 && <span className={styles.currencySep}>·</span>}
+                <span className={styles.totalAmount}>
+                  {formatCompact(stats.monthlyTotal)}
+                </span>
+                <span className={styles.totalSymbol}>{getCurrencySymbol(currency)}</span>
+              </span>
+            );
+          })
+        ) : (
+          <span className={styles.totalAmount}>0 ₽</span>
+        )}
       </button>
 
       {/* Stats popup */}
       {isVisible && (
-        <div
-          className={`${styles.statsPopup} ${isClosing ? styles.closing : ''}`}
-        >
+        <div className={`${styles.statsPopup} ${isClosing ? styles.closing : ''}`}>
           <div className={styles.statsArrow} />
 
-          <div className={styles.statsRow}>
-            <span className={styles.statsLabel}>{t('stats.totalSpent')}</span>
-            <span className={styles.statsValuePrimary}>
-              {stats.totalSpent.toLocaleString('ru-RU')} {t('currency')}
-            </span>
-          </div>
+          {/* Stats for each currency */}
+          {activeCurrencies.map((currency, index) => {
+            const stats = statsByCurrency[currency];
+            if (!stats) return null;
+            const symbol = getCurrencySymbol(currency);
+            const isSelected = selectedCurrencies.includes(currency);
+            const canSelect = isSelected || selectedCurrencies.length < MAX_DISPLAYED_CURRENCIES;
 
-          <div className={styles.statsDivider} />
-
-          <div className={styles.statsRow}>
-            <span className={styles.statsLabel}>{t('stats.perDay')}</span>
-            <span className={styles.statsValue}>
-              {stats.avgPerDay.toLocaleString('ru-RU')} {t('currency')}
-            </span>
-          </div>
-
-          <div className={styles.statsRow}>
-            <span className={styles.statsLabel}>{t('stats.monthly')}</span>
-            <span className={styles.statsValue}>
-              {monthlyTotal.toLocaleString('ru-RU')} {t('currency')}
-            </span>
-          </div>
-
-          <div className={styles.statsRow}>
-            <span className={styles.statsLabel}>{t('stats.yearly')}</span>
-            <span className={styles.statsValue}>
-              {stats.yearlyProjection.toLocaleString('ru-RU')} {t('currency')}
-            </span>
-          </div>
+            return (
+              <div key={currency}>
+                {index > 0 && <div className={styles.statsDivider} />}
+                <div
+                  className={`${styles.currencyBlock} ${isSelected ? styles.currencyBlockSelected : ''} ${!canSelect ? styles.currencyBlockDisabled : ''}`}
+                  onClick={() => toggleCurrency(currency)}
+                >
+                  <div className={styles.statsRow}>
+                    <span className={styles.statsLabel}>{t('stats.totalSpent')}</span>
+                    <span className={styles.statsValuePrimary}>
+                      {Math.round(stats.totalSpent).toLocaleString('ru-RU')} {symbol}
+                    </span>
+                  </div>
+                  <div className={styles.statsRowCompact}>
+                    <span>{t('stats.perDay')}: {Math.round(stats.avgPerDay).toLocaleString('ru-RU')} {symbol}</span>
+                    <span>{t('stats.monthly')}: {Math.round(stats.monthlyTotal).toLocaleString('ru-RU')} {symbol}</span>
+                    <span>{t('stats.yearly')}: {Math.round(stats.yearlyProjection).toLocaleString('ru-RU')} {symbol}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

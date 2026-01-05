@@ -2,6 +2,7 @@ import { useState, useRef, TouchEvent, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Subscription } from '../../types/subscription';
 import { getDaysUntil, calculateTotalPaid } from '../../hooks/useStats';
+import { getCurrencySymbol } from '../../utils/currency';
 import { IconBadge, DatePicker, Input, Button } from '../UI';
 import { useTelegram } from '../../hooks/useTelegram';
 import styles from './SubscriptionCard.module.css';
@@ -187,10 +188,10 @@ export function SubscriptionCard({
 
           <div className={styles.priceSection}>
             <span className={styles.price}>
-              {subscription.amount.toLocaleString()} {t('currency')}
+              {subscription.amount.toLocaleString()} {getCurrencySymbol(subscription.currency || 'RUB')}
             </span>
             <span className={styles.ltv}>
-              {t('card.ltv')}: {totalPaid.amount.toLocaleString()} {t('currency')}
+              {t('card.ltv')}: {totalPaid.amount.toLocaleString()} {getCurrencySymbol(subscription.currency || 'RUB')}
             </span>
           </div>
         </div>
@@ -258,7 +259,7 @@ function InlineEditForm({ subscription, onSave }: InlineEditFormProps) {
       icon: subscription.icon,
       color: subscription.color,
       amount: amountNum,
-      currency: 'RUB',
+      currency: subscription.currency || 'RUB',
       periodMonths: 1,
       billingDay: dayNum,
       startDate: dateObj.toISOString(),
@@ -303,7 +304,7 @@ function InlineEditForm({ subscription, onSave }: InlineEditFormProps) {
             onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
             placeholder="0"
             inputMode="numeric"
-            suffix={t('currency')}
+            suffix={getCurrencySymbol(subscription.currency || 'RUB')}
           />
           <Input
             label={t('form.day')}

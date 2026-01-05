@@ -33,7 +33,7 @@
 .iconButton {
   width: 52px;
   height: 52px;
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,27 +58,22 @@
 
 /* Amount wrapper with currency button */
 .amountWrapper {
-  position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 6px;
   min-width: 0;
-  overflow: hidden;
 }
 
-.currencySymbol {
-  position: absolute;
-  right: 10px;
-  bottom: 12px;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--app-hint-color);
+.amountWrapper > div {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Day wrapper with month badge */
 .dayWrapper {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .dayLabel {
@@ -123,7 +118,7 @@
 .periodWrapper {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .periodLabel {
@@ -157,9 +152,9 @@
 .periodPicker {
   display: flex;
   gap: 6px;
-  padding: 10px;
+  padding: 8px;
   background: var(--app-bg-color);
-  border-radius: 12px;
+  border-radius: 10px;
   animation: slideDown 0.2s ease-out;
 }
 
@@ -238,7 +233,7 @@
 .dateSection {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .dateLabel {
@@ -315,8 +310,8 @@
 .emojiGrid {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 4px;
-  padding: 10px;
+  gap: 6px;
+  padding: 8px;
   background: var(--app-bg-color);
   border-radius: 0 0 12px 12px;
   max-height: 140px;
@@ -382,3 +377,56 @@
 .actions button {
   flex: 1;
 }
+
+/* Currency suffix in input */
+.currencySuffix {
+  color: var(--app-button-color);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin: -4px -4px -4px 0;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.currencySuffix:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Currency picker popup */
+.currencyPicker {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  padding: 8px;
+  background: var(--app-bg-color);
+  border-radius: 10px;
+  animation: slideDown 0.2s ease-out;
+}
+
+.currencyOption {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 8px;
+  border: none;
+  background: var(--app-secondary-bg-color);
+  color: var(--app-text-color);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+}
+
+.currencyOption:active {
+  transform: scale(0.95);
+}
+
+.currencyOptionActive {
+  background: var(--app-button-color);
+  color: white;
+}
+
+
