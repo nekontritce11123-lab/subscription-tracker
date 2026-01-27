@@ -25,6 +25,15 @@ export async function startBot(): Promise<void> {
     { command: 'start', description: 'Открыть трекер подписок' },
   ]);
 
+  // Set menu button to open Mini App
+  await bot.api.setChatMenuButton({
+    menu_button: {
+      type: 'web_app',
+      text: 'Открыть',
+      web_app: { url: config.webAppUrl },
+    },
+  });
+
   // Start polling
   bot.start({
     onStart: (botInfo) => {
