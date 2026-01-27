@@ -15,6 +15,7 @@ export interface Subscription {
   isTrial?: boolean;        // Пробный период
   emoji?: string;           // Эмодзи вместо первой буквы
   createdAt: string;
+  updatedAt?: string;       // Время последнего обновления (для синхронизации)
 }
 
 export interface Stats {

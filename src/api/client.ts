@@ -32,6 +32,7 @@ function mapApiToLocal(sub: ApiSubscription): Subscription {
     isTrial: sub.isTrial,
     emoji: sub.emoji,
     createdAt: sub.createdAt,
+    updatedAt: sub.updatedAt,
   };
 }
 

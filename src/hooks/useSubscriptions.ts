@@ -109,6 +109,33 @@ function validateSubscription(sub: unknown): sub is Subscription {
   );
 }
 
+/**
+ * Merge local and server subscriptions
+ * Server subscriptions with newer updatedAt take precedence
+ */
+function mergeSubscriptions(local: Subscription[], server: Subscription[]): Subscription[] {
+  const result = new Map<string, Subscription>();
+
+  // First add all local subscriptions
+  for (const sub of local) {
+    result.set(sub.id, sub);
+  }
+
+  // Then merge server subscriptions (newer wins)
+  for (const sub of server) {
+    const existing = result.get(sub.id);
+    const serverTime = sub.updatedAt ? new Date(sub.updatedAt).getTime() : 0;
+    const localTime = existing?.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+
+    // Server wins if: no local version OR server is newer
+    if (!existing || serverTime > localTime) {
+      result.set(sub.id, sub);
+    }
+  }
+
+  return Array.from(result.values());
+}
+
 function loadFromLocalStorage(): Subscription[] {
   try {
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -212,7 +239,8 @@ export function useSubscriptions() {
   const initAttempted = useRef(false);
 
   // Save function that saves to appropriate storage
-  const save = useCallback(async (subs: Subscription[]) => {
+  // skipSync: set to true when merging from server to avoid infinite loop
+  const save = useCallback(async (subs: Subscription[], skipSync = false) => {
     // Always save to localStorage as backup
     saveToLocalStorage(subs);
 
@@ -221,8 +249,10 @@ export function useSubscriptions() {
       await saveToCloudStorage(subs);
     }
 
-    // Sync to backend for notifications (fire and forget)
-    syncToBackend(subs);
+    // Sync to backend for notifications (with await, skip if merging from server)
+    if (!skipSync) {
+      await syncToBackend(subs);
+    }
   }, [useCloudStorage]);
 
   // Initialize: try CloudStorage first, fallback to localStorage
@@ -259,12 +289,32 @@ export function useSubscriptions() {
         setUseCloudStorage(false);
       }
 
+      // Pull from backend to get any updates made via Telegram bot
+      try {
+        const serverData = await apiClient.getSubscriptions();
+        if (serverData && serverData.length > 0) {
+          console.log('[Subscriptions] Pulled', serverData.length, 'subscriptions from backend');
+          const merged = mergeSubscriptions(loaded, serverData);
+
+          // Save merged data locally WITHOUT syncing back to backend
+          saveToLocalStorage(merged);
+          if (cloudStorage.isAvailable()) {
+            await saveToCloudStorage(merged);
+          }
+
+          loaded = merged;
+          console.log('[Subscriptions] Merged to', merged.length, 'subscriptions');
+        }
+      } catch (error) {
+        console.error('[Subscriptions] Failed to pull from backend:', error);
+      }
+
       setSubscriptions(loaded);
       setIsLoaded(true);
 
-      // Sync to backend for notifications
+      // Sync to backend for notifications (send our data)
       if (loaded.length > 0) {
-        syncToBackend(loaded);
+        await syncToBackend(loaded);
       }
     }
 

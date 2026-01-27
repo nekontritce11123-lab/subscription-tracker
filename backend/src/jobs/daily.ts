@@ -36,8 +36,8 @@ function buildOverdueKeyboard(subId: string) {
   // Deep link to Mini App via t.me (works for both HTTP and HTTPS)
   const deepLink = `https://t.me/${config.botUsername}?startapp=${subId}`;
 
-  type ButtonRow = Array<{ text: string; callback_data?: string; web_app?: { url: string }; url?: string }>;
-  const buttons: ButtonRow[] = [
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const buttons: any[][] = [
     [
       { text: 'Сегодня', callback_data: `paid_today:${subId}` },
       { text: 'Вчера', callback_data: `paid_yesterday:${subId}` },
@@ -46,10 +46,8 @@ function buildOverdueKeyboard(subId: string) {
 
   // Add "Other date" button
   if (isHttps) {
-    // For production: use web_app for seamless experience
     buttons.push([{ text: 'Другая дата', web_app: { url: webAppUrl } }]);
   } else {
-    // For dev: use t.me deep link to open Mini App
     buttons.push([{ text: 'Другая дата', url: deepLink }]);
   }
 

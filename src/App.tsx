@@ -60,13 +60,15 @@ function App() {
   }, []);
 
   // Open payment sheet when deep link subscription is loaded
+  // Removed subscriptions.length > 0 check - after pull/merge subscription may appear
   useEffect(() => {
-    if (deepLinkId && isLoaded && subscriptions.length > 0) {
+    if (deepLinkId && isLoaded) {
       const subscription = getSubscription(deepLinkId);
       if (subscription) {
         setPaymentSubscription(subscription);
         setDeepLinkId(null);
       }
+      // If subscription not found, keep deepLinkId and wait for next sync
     }
   }, [deepLinkId, isLoaded, subscriptions, getSubscription]);
 
@@ -128,7 +130,7 @@ function App() {
     } else {
       updateSubscription(paymentSubscription.id, {
         startDate: date.toISOString(),
-        billingDay: date.getDate(),
+        billingDay: Math.min(date.getDate(), 28), // Max 28 to avoid month-end issues
       });
     }
     setPaymentSubscription(null);

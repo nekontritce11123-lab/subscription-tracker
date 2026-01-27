@@ -160,13 +160,29 @@ export function formatAmount(amount: number, currency: string): string {
 
 /**
  * Calculate next billing date after a payment
+ * Uses billingDay to determine the correct day of month
  */
 export function getNextBillingDate(subscription: Subscription, fromDate?: Date): Date {
-  const from = fromDate || new Date();
+  // Create copy to avoid mutating input
+  const from = new Date(fromDate || new Date());
   from.setHours(0, 0, 0, 0);
 
-  const nextBilling = new Date(from);
-  nextBilling.setMonth(nextBilling.getMonth() + subscription.periodMonths);
+  // Calculate target month based on periodMonths
+  let targetMonth = from.getMonth();
+  let targetYear = from.getFullYear();
 
-  return nextBilling;
+  // If billingDay already passed in current month, add periodMonths
+  if (from.getDate() > subscription.billingDay) {
+    targetMonth += subscription.periodMonths;
+  }
+
+  // Handle year overflow
+  targetYear += Math.floor(targetMonth / 12);
+  targetMonth = targetMonth % 12;
+
+  // Get last day of target month to handle edge cases (e.g., billingDay=31 in February)
+  const lastDayOfMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+  const day = Math.min(subscription.billingDay, lastDayOfMonth);
+
+  return new Date(targetYear, targetMonth, day);
 }

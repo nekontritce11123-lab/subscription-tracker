@@ -99,9 +99,16 @@ export async function markAsPaid(id: string, userId: number, paidDate?: string):
   }
 
   const subscription = db.data.subscriptions[index];
+  const paymentDateStr = paidDate || new Date().toISOString().split('T')[0];
+  const paymentDate = new Date(paymentDateStr);
 
   // Update startDate to move billing cycle forward
-  subscription.startDate = paidDate || new Date().toISOString().split('T')[0];
+  subscription.startDate = paymentDateStr;
+
+  // Update billingDay to match the payment date (limited to 28 to avoid month-end issues)
+  const paymentDay = paymentDate.getDate();
+  subscription.billingDay = Math.min(paymentDay, 28);
+
   subscription.isTrial = false; // No longer trial after payment
   subscription.updatedAt = new Date().toISOString();
 
@@ -117,7 +124,8 @@ export async function getAllSubscriptions(): Promise<Subscription[]> {
 
 /**
  * Sync subscriptions from CloudStorage
- * Replaces all subscriptions for a user with the provided list
+ * Uses merge-based approach: compares updatedAt timestamps
+ * Does NOT delete subscriptions that exist on server but not in incoming data
  */
 export async function syncSubscriptions(
   userId: number,
@@ -134,34 +142,79 @@ export async function syncSubscriptions(
     isTrial: boolean;
     emoji?: string;
     createdAt: string;
+    updatedAt?: string;
   }>
-): Promise<void> {
+): Promise<Subscription[]> {
   await db.read();
 
-  // Remove all existing subscriptions for this user
-  db.data.subscriptions = db.data.subscriptions.filter(sub => sub.userId !== userId);
-
-  // Add new subscriptions
+  const result: Subscription[] = [];
   const now = new Date().toISOString();
-  const newSubscriptions: Subscription[] = subscriptions.map(sub => ({
-    id: sub.id,
-    userId,
-    name: sub.name,
-    icon: sub.icon || sub.name.charAt(0).toUpperCase(),
-    color: sub.color || '#007AFF',
-    amount: sub.amount,
-    currency: sub.currency || 'RUB',
-    periodMonths: sub.periodMonths || 1,
-    billingDay: sub.billingDay,
-    startDate: sub.startDate,
-    isTrial: sub.isTrial || false,
-    emoji: sub.emoji,
-    createdAt: sub.createdAt || now,
-    updatedAt: now,
-  }));
 
-  db.data.subscriptions.push(...newSubscriptions);
+  // Process incoming subscriptions (update existing or add new)
+  for (const incoming of subscriptions) {
+    const existingIndex = db.data.subscriptions.findIndex(
+      s => s.id === incoming.id && s.userId === userId
+    );
+
+    if (existingIndex >= 0) {
+      const existing = db.data.subscriptions[existingIndex];
+      // Compare timestamps - take the newer version
+      const incomingTime = incoming.updatedAt ? new Date(incoming.updatedAt).getTime() : 0;
+      const existingTime = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+
+      if (incomingTime >= existingTime) {
+        // Incoming is newer - update
+        db.data.subscriptions[existingIndex] = {
+          id: incoming.id,
+          userId,
+          name: incoming.name,
+          icon: incoming.icon || incoming.name.charAt(0).toUpperCase(),
+          color: incoming.color || '#007AFF',
+          amount: incoming.amount,
+          currency: incoming.currency || 'RUB',
+          periodMonths: incoming.periodMonths || 1,
+          billingDay: incoming.billingDay,
+          startDate: incoming.startDate,
+          isTrial: incoming.isTrial || false,
+          emoji: incoming.emoji,
+          createdAt: incoming.createdAt || now,
+          updatedAt: now,
+        };
+      }
+      result.push(db.data.subscriptions[existingIndex]);
+    } else {
+      // New subscription - add it
+      const newSub: Subscription = {
+        id: incoming.id,
+        userId,
+        name: incoming.name,
+        icon: incoming.icon || incoming.name.charAt(0).toUpperCase(),
+        color: incoming.color || '#007AFF',
+        amount: incoming.amount,
+        currency: incoming.currency || 'RUB',
+        periodMonths: incoming.periodMonths || 1,
+        billingDay: incoming.billingDay,
+        startDate: incoming.startDate,
+        isTrial: incoming.isTrial || false,
+        emoji: incoming.emoji,
+        createdAt: incoming.createdAt || now,
+        updatedAt: now,
+      };
+      db.data.subscriptions.push(newSub);
+      result.push(newSub);
+    }
+  }
+
+  // Add subscriptions that exist on server but not in incoming data
+  // (e.g., created via Telegram bot callbacks)
+  const incomingIds = new Set(subscriptions.map(s => s.id));
+  const serverOnlySubs = db.data.subscriptions.filter(
+    s => s.userId === userId && !incomingIds.has(s.id)
+  );
+  result.push(...serverOnlySubs);
+
   await db.write();
 
-  console.log(`[Subscriptions] Synced ${subscriptions.length} subscriptions for user ${userId}`);
+  console.log(`[Subscriptions] Merged ${subscriptions.length} incoming, ${serverOnlySubs.length} server-only for user ${userId}`);
+  return result;
 }

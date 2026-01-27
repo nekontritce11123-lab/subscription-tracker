@@ -54,6 +54,7 @@ export function PaymentContent({
   const [selectedDate, setSelectedDate] = useState(() =>
     isDueToday ? getTodayString() : getBillingDateString(subscription.billingDay)
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const minDate = getMinDate();
 
   const handleDateChange = (dateStr: string) => {
@@ -61,6 +62,9 @@ export function PaymentContent({
   };
 
   const handleConfirm = () => {
+    if (isSubmitting) return; // Prevent double click
+    setIsSubmitting(true);
+
     hapticFeedback.success();
     const [year, month, day] = selectedDate.split('-').map(Number);
     const date = new Date(year, month - 1, day);
@@ -106,10 +110,10 @@ export function PaymentContent({
 
       {/* Actions */}
       <div className={styles.actions}>
-        <Button variant="destructive" onClick={handleCancel}>
+        <Button variant="destructive" onClick={handleCancel} disabled={isSubmitting}>
           {t('payment.cancelled')}
         </Button>
-        <Button onClick={handleConfirm}>
+        <Button onClick={handleConfirm} disabled={isSubmitting}>
           {t('payment.confirm')}
         </Button>
       </div>
