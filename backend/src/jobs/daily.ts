@@ -14,18 +14,46 @@ import { Subscription, OverdueSubscription } from '../types.js';
  * Send reminder for subscription due tomorrow (simple message, no buttons)
  */
 async function sendReminderMessage(userId: number, sub: Subscription): Promise<void> {
-  const icon = sub.emoji || sub.icon;
   const message =
-    `📢 Напоминание!\n\n` +
-    `Завтра оплата подписки:\n` +
-    `${icon} ${sub.name}\n` +
-    `💰 ${formatAmount(sub.amount, sub.currency)}`;
+    `◆ Напоминание\n\n` +
+    `*${sub.name}*\n` +
+    `Завтра · ${formatAmount(sub.amount, sub.currency)}`;
 
   try {
-    await bot.api.sendMessage(userId, message);
+    await bot.api.sendMessage(userId, message, { parse_mode: 'Markdown' });
   } catch (error) {
     console.error(`[Notifications] Failed to send reminder to user ${userId}:`, error);
   }
+}
+
+/**
+ * Build inline keyboard for overdue message
+ * Shows quick date options + link to app for custom date
+ */
+function buildOverdueKeyboard(subId: string) {
+  const isHttps = config.webAppUrl.startsWith('https://');
+  const webAppUrl = `${config.webAppUrl}?subscription=${subId}`;
+  // Deep link to Mini App via t.me (works for both HTTP and HTTPS)
+  const deepLink = `https://t.me/${config.botUsername}?startapp=${subId}`;
+
+  type ButtonRow = Array<{ text: string; callback_data?: string; web_app?: { url: string }; url?: string }>;
+  const buttons: ButtonRow[] = [
+    [
+      { text: 'Сегодня', callback_data: `paid_today:${subId}` },
+      { text: 'Вчера', callback_data: `paid_yesterday:${subId}` },
+    ],
+  ];
+
+  // Add "Other date" button
+  if (isHttps) {
+    // For production: use web_app for seamless experience
+    buttons.push([{ text: 'Другая дата', web_app: { url: webAppUrl } }]);
+  } else {
+    // For dev: use t.me deep link to open Mini App
+    buttons.push([{ text: 'Другая дата', url: deepLink }]);
+  }
+
+  return { inline_keyboard: buttons };
 }
 
 /**
@@ -36,38 +64,27 @@ async function sendOverdueMessage(
   item: OverdueSubscription
 ): Promise<void> {
   const { subscription: sub, overdueDays, isDueToday } = item;
-  const icon = sub.emoji || sub.icon;
 
   let message: string;
 
   if (isDueToday) {
     message =
-      `🔔 Сегодня оплата!\n\n` +
-      `${icon} ${sub.name}\n` +
-      `💰 ${formatAmount(sub.amount, sub.currency)}`;
+      `● Сегодня\n\n` +
+      `*${sub.name}*\n` +
+      `${formatAmount(sub.amount, sub.currency)}`;
   } else {
     const daysText =
       overdueDays === 1 ? 'день' : overdueDays < 5 ? 'дня' : 'дней';
     message =
-      `⚠️ Просрочен платеж!\n\n` +
-      `${icon} ${sub.name}\n` +
-      `💰 ${formatAmount(sub.amount, sub.currency)}\n` +
-      `📅 Просрочено на ${overdueDays} ${daysText}`;
+      `○ Просрочено\n\n` +
+      `*${sub.name}*\n` +
+      `${formatAmount(sub.amount, sub.currency)} · ${overdueDays} ${daysText}`;
   }
 
   try {
     await bot.api.sendMessage(userId, message, {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '✅ Оплатил сегодня', callback_data: `paid_today:${sub.id}` }],
-          [
-            {
-              text: '📱 Укажу когда оплатил',
-              web_app: { url: `${config.webAppUrl}?subscription=${sub.id}` },
-            },
-          ],
-        ],
-      },
+      parse_mode: 'Markdown',
+      reply_markup: buildOverdueKeyboard(sub.id),
     });
   } catch (error) {
     console.error(`[Notifications] Failed to send to user ${userId}:`, error);

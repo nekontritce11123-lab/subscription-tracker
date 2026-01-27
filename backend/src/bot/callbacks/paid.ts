@@ -43,11 +43,57 @@ export async function handlePaidTodayCallback(ctx: Context): Promise<void> {
     month: 'long',
   });
 
-  // Update message
-  const icon = subscription.emoji || subscription.icon;
+  // Update message with clean design
   await ctx.editMessageText(
-    `✅ ${icon} ${subscription.name} оплачена!\n\n📅 Следующий платеж: ${nextDateStr}`,
-    { reply_markup: undefined }
+    `✓ *${subscription.name}*\nОплачено · Следующий: ${nextDateStr}`,
+    { parse_mode: 'Markdown', reply_markup: undefined }
+  );
+
+  await ctx.answerCallbackQuery({ text: 'Оплата подтверждена!' });
+}
+
+/**
+ * Handle "Оплатил вчера" callback
+ * Format: paid_yesterday:<subscription_id>
+ */
+export async function handlePaidYesterdayCallback(ctx: Context): Promise<void> {
+  const callbackData = ctx.callbackQuery?.data;
+
+  if (!callbackData || !callbackData.startsWith('paid_yesterday:')) {
+    await ctx.answerCallbackQuery({ text: 'Ошибка: неверные данные' });
+    return;
+  }
+
+  const subscriptionId = callbackData.replace('paid_yesterday:', '');
+  const userId = ctx.from?.id;
+
+  if (!userId) {
+    await ctx.answerCallbackQuery({ text: 'Ошибка: пользователь не определен' });
+    return;
+  }
+
+  const subscription = await getSubscriptionById(subscriptionId);
+
+  if (!subscription || subscription.userId !== userId) {
+    await ctx.answerCallbackQuery({ text: 'Подписка не найдена' });
+    return;
+  }
+
+  // Mark as paid with yesterday's date
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  await markAsPaid(subscriptionId, userId, yesterdayStr);
+
+  const nextBilling = getNextBillingDate(subscription);
+  const nextDateStr = nextBilling.toLocaleDateString('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+  });
+
+  await ctx.editMessageText(
+    `✓ *${subscription.name}*\nОплачено · Следующий: ${nextDateStr}`,
+    { parse_mode: 'Markdown', reply_markup: undefined }
   );
 
   await ctx.answerCallbackQuery({ text: 'Оплата подтверждена!' });
@@ -116,11 +162,16 @@ export async function handleOpenCallback(ctx: Context): Promise<void> {
   }
 
   const subscriptionId = callbackData.replace('open:', '');
-
-  // Open Mini App with subscription parameter
   const url = `${config.webAppUrl}?subscription=${subscriptionId}`;
 
-  await ctx.answerCallbackQuery({
-    url,
-  });
+  // For HTTPS - open Mini App directly
+  if (config.webAppUrl.startsWith('https://')) {
+    await ctx.answerCallbackQuery({ url });
+  } else {
+    // For dev (HTTP) - show instruction popup
+    await ctx.answerCallbackQuery({
+      text: 'Откройте приложение через кнопку меню',
+      show_alert: true,
+    });
+  }
 }

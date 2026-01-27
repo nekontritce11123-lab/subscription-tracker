@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { syncSubscriptions } from '../../database/repositories/subscriptions.js';
+import { upsertUser } from '../../database/repositories/users.js';
 
 const router = Router();
 
@@ -15,6 +16,9 @@ router.post('/', async (req, res: Response) => {
     const { subscriptions } = req.body;
 
     console.log(`[Sync] User ${telegramUser.id} (${telegramUser.first_name}) syncing ${subscriptions?.length || 0} subscriptions`);
+
+    // Ensure user exists in database for notifications
+    await upsertUser(telegramUser);
 
     if (!Array.isArray(subscriptions)) {
       res.status(400).json({ error: 'subscriptions must be an array' });

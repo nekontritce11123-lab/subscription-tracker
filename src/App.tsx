@@ -37,10 +37,21 @@ function App() {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [highlightedIds, setHighlightedIds] = useState<string[]>([]);
 
-  // Handle deep link from notification (?subscription=<id>)
+  // Handle deep link from notification (?subscription=<id> or startapp=<id>)
   useEffect(() => {
+    // Check URL params first (for HTTPS web_app button)
     const params = new URLSearchParams(window.location.search);
-    const subscriptionId = params.get('subscription');
+    let subscriptionId = params.get('subscription');
+
+    // Also check Telegram startapp parameter (for t.me deep link)
+    if (!subscriptionId) {
+      const tgWebApp = (window as any).Telegram?.WebApp;
+      const startParam = tgWebApp?.initDataUnsafe?.start_param;
+      if (startParam) {
+        subscriptionId = startParam;
+      }
+    }
+
     if (subscriptionId) {
       setDeepLinkId(subscriptionId);
       // Clear URL params to prevent reopening on refresh

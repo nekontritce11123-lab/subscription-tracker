@@ -35,13 +35,10 @@ function getBillingDateString(billingDay: number): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-function getMinDate(billingDay: number): Date {
+function getMinDate(): Date {
   const today = new Date();
-  // Если billingDay > сегодня, значит это прошлый месяц
-  if (billingDay > today.getDate()) {
-    return new Date(today.getFullYear(), today.getMonth() - 1, billingDay);
-  }
-  return new Date(today.getFullYear(), today.getMonth(), billingDay);
+  // Разрешаем выбор дат за последние 60 дней
+  return new Date(today.getFullYear(), today.getMonth() - 2, today.getDate());
 }
 
 export function PaymentContent({
@@ -57,7 +54,7 @@ export function PaymentContent({
   const [selectedDate, setSelectedDate] = useState(() =>
     isDueToday ? getTodayString() : getBillingDateString(subscription.billingDay)
   );
-  const minDate = getMinDate(subscription.billingDay);
+  const minDate = getMinDate();
 
   const handleDateChange = (dateStr: string) => {
     setSelectedDate(dateStr);

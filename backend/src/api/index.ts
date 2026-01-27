@@ -5,6 +5,9 @@ import { authMiddleware, devAuthMiddleware } from './middleware/auth.js';
 import authRoutes from './routes/auth.js';
 import subscriptionRoutes from './routes/subscriptions.js';
 import syncRoutes from './routes/sync.js';
+import { sendDailyNotifications } from '../jobs/daily.js';
+import { getAllUsers } from '../database/repositories/users.js';
+import { getAllSubscriptions } from '../database/repositories/subscriptions.js';
 
 const app = express();
 
@@ -68,6 +71,28 @@ const auth = process.env.NODE_ENV === 'production'
 app.use('/api/auth', auth, authRoutes);
 app.use('/api/subscriptions', auth, subscriptionRoutes);
 app.use('/api/sync', auth, syncRoutes);
+
+// Debug & Test endpoints (development only)
+if (process.env.NODE_ENV !== 'production') {
+  // Manual trigger for notifications
+  app.post('/api/test/notifications', async (req, res) => {
+    console.log('[Test] Manually triggering notifications...');
+    await sendDailyNotifications();
+    res.json({ success: true, timestamp: new Date().toISOString() });
+  });
+
+  // View database state
+  app.get('/api/debug/state', async (req, res) => {
+    const users = await getAllUsers();
+    const subscriptions = await getAllSubscriptions();
+    res.json({
+      usersCount: users.length,
+      subscriptionsCount: subscriptions.length,
+      users,
+      subscriptions
+    });
+  });
+}
 
 // Error handling
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

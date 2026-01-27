@@ -2,6 +2,7 @@ import 'dotenv/config';
 
 export const config = {
   botToken: process.env.BOT_TOKEN || '',
+  botUsername: process.env.BOT_USERNAME || 'FCTracerBot',
   webAppUrl: process.env.WEBAPP_URL || 'http://localhost:5173',
   port: parseInt(process.env.PORT || '3000', 10),
 };

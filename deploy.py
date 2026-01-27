@@ -78,7 +78,7 @@ EOF""")
     # Backend .env
     run_command(ssh, f"""cat > {APP_PATH}/backend/.env << 'EOF'
 BOT_TOKEN=8205357635:AAHuNLismxRNT1pHaDYII16VYNwzf0KHymM
-WEBAPP_URL=http://217.60.3.122
+WEBAPP_URL=https://factchain-traker.ru/
 PORT=3001
 EOF""")
 
